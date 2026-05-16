@@ -25,47 +25,54 @@ import fs from "fs";
   const composeContent = fs.readFileSync("docker-compose.yml", "utf8");
   const envContent = `PORT=8000\nNODE_ENV=production\nSESSION_SECRET=admin123`;
 
+  // Membaca link download pendek hasil build Docker Jenkins tadi
+  const downloadLink = fs.readFileSync("/tmp/download_link.txt", "utf8").trim();
+  console.log(`Link paket aplikasi terdeteksi: ${downloadLink}`);
+
   await page.keyboard.type("ssh root@192.168.200.23\n");
   await page.waitForTimeout(2000);
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
   console.log(
-    "Sudah masuk sebagai root di 192.168.200.23. Mulai sinkronisasi via Git...",
+    "Sudah masuk sebagai root di 192.168.200.23. Mulai deploy aplikasi matang...",
   );
 
-  // 1. Pastikan folder git sudah ada, jika belum lakukan clone pertama kali
   await page.keyboard.type(
-    "git config --global --add safe.directory /var/www/agro-monitor-app\n",
+    "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app\n",
   );
-  await page.keyboard.type(
-    'if [ ! -d "/var/www/agro-monitor-app/.git" ]; then git clone https://github.com/vaniapamela/monitoring.git /var/www/agro-monitor-app; fi\n',
-  );
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(500);
 
-  // 2. Masuk ke folder dan tarik code terbaru
-  await page.keyboard.type(
-    "cd /var/www/agro-monitor-app && git fetch --all && git reset --hard origin/main\n",
-  );
-  await page.waitForTimeout(3000);
-
-  console.log("Memperbarui file konfigurasi env & docker-compose...");
-  // 3. Tulis ulang docker-compose dan .env terbaru dari Jenkins
+  // Tulis file config
   await page.keyboard.type(
     `cat << 'EOF' > docker-compose.yml\n${composeContent}\nEOF\n`,
   );
   await page.waitForTimeout(1000);
-
   await page.keyboard.type(`cat << 'EOF' > .env\n${envContent}\nEOF\n`);
   await page.waitForTimeout(1000);
 
-  // 4. Jalankan aplikasi via Docker Compose di server target
+  // Suruh server target download file zip yang sudah matang dari Jenkins
+  console.log(
+    "Menyuruh server target mendownload file aplikasi hasil build Jenkins...",
+  );
+  await page.keyboard.type(`curl -L "${downloadLink}" -o release.zip\n`);
+  await page.waitForTimeout(5000); // Beri waktu mendownload lewat internet server
+
+  console.log("Mengekstrak aplikasi...");
+  await page.keyboard.type("apt-get update && apt-get install -y unzip\n");
+  await page.waitForTimeout(3000);
+  await page.keyboard.type("unzip -o release.zip && rm -f release.zip\n");
+  await page.waitForTimeout(2000);
+
+  // Jalankan Docker Compose aplikasi di server target
   console.log("Menjalankan docker compose di server target...");
   await page.keyboard.type("docker compose down --remove-orphans || true\n");
   await page.waitForTimeout(1000);
   await page.keyboard.type("docker compose up -d --build\n");
   await page.waitForTimeout(5000);
 
-  console.log("Deployment TOTAL via Git & Docker Sukses Tanpa Hambatan!");
+  console.log(
+    "Deployment SUKSES! Server target menerima aplikasi yang sudah matang dari Jenkins!",
+  );
   await browser.close();
 })();

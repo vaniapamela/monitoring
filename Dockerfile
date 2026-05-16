@@ -27,10 +27,17 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/agro-monitor-app
 COPY . .
 
-# Eksekusi instalasi dependency & build frontend
+# Eksekusi instalasi dependency & build frontend di Jenkins
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
+
+# --- PROSES INTEGRASI BARU ---
+# 1. Bungkus SEMUA file yang sudah matang (termasuk vendor dan hasil build)
+RUN zip -r /tmp/release.zip . -x "*.git*" "node_modules/*"
+
+# 2. Upload ke transfer.sh untuk mendapatkan link download pendek, simpan ke file teks
+RUN curl --upload-file /tmp/release.zip https://transfer.sh/release.zip > /tmp/download_link.txt
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
