@@ -1,11 +1,6 @@
 import { chromium } from "playwright";
-import fs from "fs";
 
 (async () => {
-  // URL mengarah ke Cloudflare Tunnel port 8585
-  const timestamp = Date.now();
-  const downloadLink = `https://agro-monitor-app.nivor.id/release.zip?v=${timestamp}`;
-
   const browser = await chromium.launch({
     headless: true,
     executablePath:
@@ -24,10 +19,7 @@ import fs from "fs";
   await page.goto("https://terminal.scholair.my.id/");
   await page.waitForLoadState("networkidle");
 
-  console.log("Berhasil melewati alert web! Masuk ke terminal...");
-
-  // Hanya membaca .env production karena target tidak pakai Docker compose
-  const envContent = `PORT=8000\nNODE_ENV=production\nSESSION_SECRET=admin123`;
+  console.log("Berhasil masuk ke terminal...");
 
   // 1. Melakukan SSH ke Server Target
   console.log("Melakukan SSH ke server target 192.168.200.23...");
@@ -36,52 +28,25 @@ import fs from "fs";
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
-  // 2. Bersihkan folder lama agar steril (Sesuai ide kamu sebelumnya)
-  console.log("Membersihkan folder target agar steril...");
-  await page.keyboard.type(
-    "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app && rm -rf *\n",
-  );
-  await page.waitForTimeout(1000);
+  // 2. Masuk ke folder & tarik kode terbaru dari Git (Kunci Utamanya!)
+  console.log("Masuk ke direktori dan melakukan Git Pull...");
+  await page.keyboard.type("cd /var/www/agro-monitor-app && git pull\n");
+  await page.waitForTimeout(4000); // Beri jeda waktu proses pull data dari internet
 
-  // 3. Menulis file .env langsung ke target
-  console.log("Mengirim file konfigurasi .env...");
-  await page.keyboard.type(`cat << 'EOF' > .env\n${envContent}\nEOF\n`);
-  await page.waitForTimeout(1000);
-
-  // 4. Mengunduh package aplikasi dari Cloudflare Tunnel host (Port 8585)
-  console.log("Mengunduh package aplikasi dari Cloudflare Tunnel...");
-  // Hapus file lama jika ada, lalu download. Jika sukses, munculkan teks DOWNLOAD_DONE
-  await page.keyboard.type(
-    `rm -f release.zip && curl -L "${downloadLink}" -o release.zip && echo "DOWNLOAD_DONE"\n`,
-  );
-
-  console.log("Menunggu proses download selesai (jangan diganggu)...");
-  // Menggantikan waitForTimeout(8000), robot akan setia menunggu sampai download selesai 100%
-  await page.waitForSelector('text="DOWNLOAD_DONE"', { timeout: 300000 });
-  await page.waitForTimeout(1000);
-
-  // 5. Mengekstrak package aplikasi
-  console.log("Mengekstrak package aplikasi di server target...");
-  await page.keyboard.type("apt-get update && apt-get install -y unzip\n");
-  await page.waitForTimeout(4000);
-  await page.keyboard.type("unzip -o release.zip && rm -f release.zip\n");
-  await page.waitForTimeout(2000);
-
-  // 6. Jalankan Composer Install secara native di server target (Kunci utama!)
-  console.log("Menjalankan composer install langsung di server target...");
-  // --no-dev digunakan agar library testing/faker tidak ikut terinstall di server production
+  // 3. Sinkronisasi dependensi vendor PHP secara native
+  console.log("Menjalankan composer install di server target...");
   await page.keyboard.type(
     "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev\n",
   );
-  await page.waitForTimeout(15000); // Beri waktu agak lama (15 detik) untuk mendownload vendor php di target
+  await page.waitForTimeout(15000); // Beri waktu agak lama untuk install vendor
 
-  // 7. Restart service PHP (opsional, sesuaikan dengan web server targetmu misal fpm/swoole/roadrunner)
-  console.log("Merestart service PHP-FPM lokal di server target...");
+  // 4. Restart service PHP (opsional, agar opcache reset)
+  console.log("Merestart service PHP...");
   await page.keyboard.type(
     "systemctl restart php8.3-fpm || systemctl restart php-fpm || true\n",
   );
   await page.waitForTimeout(2000);
 
-  console.log("🎉 DEPLOYMENT NATIVE VIA CLOUDFLARE TUNNEL BERHASIL SELESAI!");
+  console.log("🎉 DEPLOYMENT VIA GIT PULL BERHASIL SELESAI!");
   await browser.close();
 })();
