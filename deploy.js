@@ -3,7 +3,8 @@ import fs from "fs";
 
 (async () => {
   // URL mengarah ke Cloudflare Tunnel port 8585
-  const downloadLink = "https://agro-monitor-app.nivor.id/release.zip";
+  const timestamp = Date.now();
+  const downloadLink = `https://agro-monitor-app.nivor.id/release.zip?v=${timestamp}`;
 
   const browser = await chromium.launch({
     headless: true,
