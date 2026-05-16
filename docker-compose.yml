@@ -1,8 +1,9 @@
 version: "3.8"
 
 services:
-  build:
-    context: .
-    dockerfile: Dockerfile
-  container_name: agro-builder-container
-  tty: true
+  builder-and-deployer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agro-builder-container
+    tty: true
