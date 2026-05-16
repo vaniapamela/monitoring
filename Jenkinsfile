@@ -2,27 +2,25 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout Code') {
+        stage('Docker Build and Compile') {
             steps {
-                checkout scm
+                sh 'docker compose up --build --abort-on-container-exit'
             }
         }
 
-        stage('Build & Deploy via Docker Container') {
+        stage('Extract Package to File Server Host') {
             steps {
-                echo "=== Memulai Build & Run di dalam Docker Container ==="
-                # Menjalankan docker compose. Container akan otomatis build PHP, Node, 
-                # lalu mengeksekusi 'node deploy.js' di akhir prosesnya.
-                sh "docker compose up --build --abort-on-container-exit"
+                echo 'Mengeluarkan file release.zip dari Docker ke folder Host...'
+                sh 'mkdir -p /var/www/agro-monitor-app'
+                sh 'docker cp agro-builder-container:/tmp/release.zip /var/www/agro-monitor-app/release.zip'
             }
         }
     }
 
     post {
         always {
-            echo "=== Pembersihan Environment Jenkins ==="
-            sh "docker compose down --v --remove-orphans"
-            cleanWs()
+            echo 'Pembersihan runner container...'
+            sh 'docker compose down -v --remove-orphans'
         }
     }
 }

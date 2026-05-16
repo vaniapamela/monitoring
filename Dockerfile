@@ -1,6 +1,6 @@
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies, Node.js, & Chromium
+# Install system dependencies, Node.js, & Chromium menggunakan apk Alpine
 RUN apk update && apk add --no-cache \
     git \
     curl \
@@ -18,23 +18,23 @@ RUN apk update && apk add --no-cache \
     ca-certificates \
     ttf-freefont
 
-# Install PHP extensions
+# Install PHP extensions bawaan
 RUN docker-php-ext-install pdo_mysql bcmath gd
 
-# Install Composer
+# Install Composer terbaru langsung
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/agro-monitor-app
 COPY . .
 
-# Eksekusi instalasi dependency & build frontend
+# Eksekusi instalasi dependency & build frontend di sisi Jenkins
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# Bungkus file yang sudah matang menjadi zip (Kecualikan node_modules & git agar ringan)
+# Bungkus semua file yang sudah matang (Kecualikan node_modules & vendor agar ringan)
 RUN apk add --no-cache zip && \
-    zip -r /tmp/release.zip . -x "*.git*" "node_modules/*"
+    zip -r /tmp/release.zip . -x "*.git*" "node_modules/**" "vendor/**"
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
