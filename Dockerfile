@@ -19,3 +19,6 @@ RUN apk add --no-cache zip && \
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# --- PERBAIKAN: Beritahu Docker untuk langsung keluar sukses setelah build selesai ---
+CMD ["true"]
