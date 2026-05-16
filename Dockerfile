@@ -23,7 +23,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && npm install -g npm@10.8.2
 
 # Set working directory
-WORKDIR /var/www/mss-app
+WORKDIR /var/www/agro-monitor-app
 
 # Salin file project
 COPY . .
