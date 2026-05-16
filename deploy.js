@@ -28,10 +28,18 @@ import { chromium } from "playwright";
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
-  // 2. Masuk ke folder & tarik kode terbaru dari Git (Kunci Utamanya!)
-  console.log("Masuk ke direktori dan melakukan Git Pull...");
-  await page.keyboard.type("cd /var/www/agro-monitor-app && git pull\n");
-  await page.waitForTimeout(4000); // Beri jeda waktu proses pull data dari internet
+  // 2. Memastikan direktori ada, masuk, dan lakukan Git Pull
+  console.log("Memastikan direktori tujuan tersedia dan melakukan Git Pull...");
+  const repoUrl = "https://github.com/vaniapamela/monitoring.git"; // <-- GANTI DENGAN URL GIT REPO KAMU
+
+  await page.keyboard.type(
+    `mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app && [ ! -d .git ] && git init && git remote add origin ${repoUrl} || true\n`,
+  );
+  await page.waitForTimeout(2000);
+
+  // Jalankan pull dari branch utama (biasanya main atau master)
+  await page.keyboard.type("git pull origin main || git pull origin master\n");
+  await page.waitForTimeout(6000); // Beri jeda waktu agak lama (6 detik) karena ini penarikan awal dari internet
 
   // 3. Sinkronisasi dependensi vendor PHP secara native
   console.log("Menjalankan composer install di server target...");
