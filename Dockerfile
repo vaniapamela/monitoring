@@ -1,6 +1,6 @@
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies, Node.js, & Chromium menggunakan 'apk' bawaan Alpine
+# Install system dependencies, Node.js, & Chromium
 RUN apk update && apk add --no-cache \
     git \
     curl \
@@ -11,7 +11,6 @@ RUN apk update && apk add --no-cache \
     openssh-client \
     nodejs \
     npm \
-    # Dependency & Browser Chromium Headless untuk Playwright
     chromium \
     nss \
     freetype \
@@ -19,24 +18,26 @@ RUN apk update && apk add --no-cache \
     ca-certificates \
     ttf-freefont
 
-# Install PHP extensions bawaan docker-php
+# Install PHP extensions
 RUN docker-php-ext-install pdo_mysql bcmath gd
 
-# Install Composer terbaru langsung
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# UBAH WORKDIR KE AGRO-MONITOR-APP
 WORKDIR /var/www/agro-monitor-app
 COPY . .
 
-# Eksekusi instalasi dependency project & build frontend
+# Eksekusi instalasi dependency & build frontend sesuai instruksi Anda
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# Beri tahu Playwright untuk menggunakan Chromium lokal bawaan Alpine
+# --- TAMBAHAN BARU: Bungkus semua hasil build yang sudah matang menjadi release.zip ---
+# Kita install utility zip dulu, lalu bungkus semua file kecuali folder .git dan cache docker
+RUN apk add --no-cache zip && \
+    zip -r /tmp/release.zip . -x "*.git*" "node_modules/*"
+
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Jalankan robot deployment
 CMD ["node", "deploy.js"]
