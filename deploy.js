@@ -1,60 +1,82 @@
-import { chromium } from "playwright";
+import playwright from "playwright";
 
 (async () => {
-  const browser = await chromium.launch({
-    headless: true,
-    executablePath:
-      process.env.PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH ||
-      "/usr/bin/chromium-browser",
+  // 1. Inisialisasi browser headless
+  const browser = await playwright.chromium.launch({
+    executablePath: "/usr/bin/chromium-browser",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
+  const page = await browser.newPage();
 
-  const context = await browser.newContext({
-    httpCredentials: { username: "sija", password: "sijagaot123" },
-  });
+  // URL Web SSH / Terminal Server kamu (Sesuaikan jika ada token/port khusus)
+  await page.goto("http://192.168.200.23");
+  await page.waitForTimeout(3000); // Tunggu terminal siap
 
-  const page = await context.newPage();
+  console.log("=== MEMULAI OTOMATISASI DEPLOYMENT DI SERVER TARGET ===");
 
-  console.log("Menghubungi pintu gerbang terminal...");
-  await page.goto("https://terminal.scholair.my.id/");
-  await page.waitForLoadState("networkidle");
+  // --- LANGKAH 1: PREPARASI FOLDER & GIT PULL ---
+  console.log("1. Memeriksa direktori dan melakukan Git Pull...");
+  const repoUrl = "https://github.com/vaniapamela/monitoring.git"; // <-- SESUAIKAN URL REPO KAMU
 
-  console.log("Berhasil masuk ke terminal...");
-
-  // 1. Melakukan SSH ke Server Target
-  console.log("Melakukan SSH ke server target 192.168.200.23...");
-  await page.keyboard.type("ssh root@192.168.200.23\n");
-  await page.waitForTimeout(2000);
-  await page.keyboard.type("admin123\n");
-  await page.waitForTimeout(2000);
-
-  // 2. Memastikan direktori ada, masuk, dan lakukan Git Pull
-  console.log("Memastikan direktori tujuan tersedia dan melakukan Git Pull...");
-  const repoUrl = "https://github.com/vaniapamela/monitoring.git"; // <-- GANTI DENGAN URL GIT REPO KAMU
-
+  // Membuat folder jika belum ada, init git jika kosong, lalu lakukan pull
   await page.keyboard.type(
     `mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app && [ ! -d .git ] && git init && git remote add origin ${repoUrl} || true\n`,
   );
   await page.waitForTimeout(2000);
-
-  // Jalankan pull dari branch utama (biasanya main atau master)
   await page.keyboard.type("git pull origin main || git pull origin master\n");
-  await page.waitForTimeout(6000); // Beri jeda waktu agak lama (6 detik) karena ini penarikan awal dari internet
+  await page.waitForTimeout(8000); // Jeda waktu tarik data dari internet
 
-  // 3. Sinkronisasi dependensi vendor PHP secara native
-  console.log("Menjalankan composer install di server target...");
+  // --- LANGKAH 2: MANAJEMEN ENVIRONMENT FILE (.env) ---
+  console.log("2. Menyetel file environment (.env.production -> .env)...");
+  // Cari .env.production, jika ada salin menjadi .env. Jika tidak ada, buat dari .env.example
   await page.keyboard.type(
-    "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev\n",
+    "if [ -f .env.production ]; then cp .env.production .env; elif [ -f .env.example ]; then cp .env.example .env; fi\n",
   );
-  await page.waitForTimeout(15000); // Beri waktu agak lama untuk install vendor
+  await page.waitForTimeout(1500);
 
-  // 4. Restart service PHP (opsional, agar opcache reset)
-  console.log("Merestart service PHP...");
+  // --- LANGKAH 3: SETTING PERMISSION AMAN & PRESISI (STANDAR PRODUCTION) ---
+  console.log("3. Menerapkan hak akses ketat (chown & chmod 755/644)...");
+  // Setel owner utama seluruh project ke www-data (Apache)
   await page.keyboard.type(
-    "systemctl restart php8.3-fpm || systemctl restart php-fpm || true\n",
+    "chown -R www-data:www-data /var/www/agro-monitor-app\n",
   );
+  await page.waitForTimeout(1000);
+  // Folder hanya bisa ditulis oleh Owner (755)
+  await page.keyboard.type(
+    "find /var/www/agro-monitor-app -type d -exec chmod 755 {} \\;\n",
+  );
+  await page.waitForTimeout(1500);
+  // File hanya bisa ditulis oleh Owner (644)
+  await page.keyboard.type(
+    "find /var/www/agro-monitor-app -type f -exec chmod 644 {} \\;\n",
+  );
+  await page.waitForTimeout(1500);
+
+  // --- LANGKAH 4: EKSEKUSI LARAVEL ARTISAN SEBAGAI WWW-DATA ---
+  console.log("4. Menjalankan optimasi dan migrasi database Laravel...");
+  // Bersihkan cache lama secara paksa terlebih dahulu
+  await page.keyboard.type(
+    "rm -f bootstrap/cache/config.php bootstrap/cache/services.php bootstrap/cache/packages.php\n",
+  );
+  await page.waitForTimeout(1000);
+
+  // Jalankan optimize:clear menyamar sebagai www-data agar file cache baru tidak dimiliki oleh root
+  await page.keyboard.type("sudo -u www-data php artisan optimize:clear\n");
   await page.waitForTimeout(2000);
 
-  console.log("🎉 DEPLOYMENT VIA GIT PULL BERHASIL SELESAI!");
+  // Jalankan migrasi database sebagai www-data (Menghindari isu readonly pada SQLite)
+  await page.keyboard.type("sudo -u www-data php artisan migrate --force\n");
+  await page.waitForTimeout(3000);
+
+  // --- LANGKAH 5: PENGHAPUSAN JEJAK SENSITIF (SELF-DESTRUCT) ---
+  console.log(
+    "5. Menghapus file deploy.js dari server target demi keamanan...",
+  );
+  // Menghapus file deploy.js jika entah bagaimana dia ter-copy atau berada di root project server target
+  await page.keyboard.type("rm -f /var/www/agro-monitor-app/deploy.js\n");
+  await page.waitForTimeout(1000);
+
+  console.log("=== 🎉 DEPLOYMENT SELESAI & JEJAK BERHASIL DIHAUS ===");
+
   await browser.close();
 })();
