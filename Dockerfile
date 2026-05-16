@@ -37,7 +37,7 @@ RUN composer install --no-interaction --optimize-autoloader
 # ----------------------------------------------
 
 # Berikan izin akses folder storage & cache
-RUN chown -R www-data:www-data /var/www/mss-app/storage /var/www/mss-app/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/agro-monitor-app/storage /var/www/agro-monitor-app/bootstrap/cache
 
 # Port yang dibuka
 EXPOSE 8000
