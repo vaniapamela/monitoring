@@ -25,15 +25,16 @@ RUN docker-php-ext-install pdo_mysql bcmath gd
 # Install Composer terbaru langsung
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+# UBAH WORKDIR KE AGRO-MONITOR-APP
+WORKDIR /var/www/agro-monitor-app
 COPY . .
 
-# Eksekusi instalasi dependency project & build frontend sesuai instruksi Anda
+# Eksekusi instalasi dependency project & build frontend
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# Beri tahu Playwright untuk menggunakan Chromium lokal bawaan Alpine (biar hemat & tidak download lagi)
+# Beri tahu Playwright untuk menggunakan Chromium lokal bawaan Alpine
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
 

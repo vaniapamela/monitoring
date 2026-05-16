@@ -6,6 +6,4 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: agro-builder-container
-    volumes:
-      - .:/app
     tty: true
