@@ -27,15 +27,14 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/agro-monitor-app
 COPY . .
 
-# Eksekusi instalasi dependency & build frontend sesuai instruksi Anda
+# Eksekusi instalasi dependency & build frontend
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# --- TAMBAHAN BARU: Bungkus semua hasil build yang sudah matang menjadi release.zip ---
-# Kita install utility zip dulu, lalu bungkus semua file kecuali folder .git dan cache docker
+# --- PERBAIKAN: Kecualikan vendor agar file zip kecil dan tidak crash ---
 RUN apk add --no-cache zip && \
-    zip -r /tmp/release.zip . -x "*.git*" "node_modules/*"
+    zip -r /tmp/release.zip . -x "*.git*" "node_modules/*" "vendor/*"
 
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
