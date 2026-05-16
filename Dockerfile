@@ -1,43 +1,41 @@
 FROM php:8.3-fpm-alpine
 
-# Install system dependencies & Node.js 20
-RUN apt-get update && apt-get install -y \
+# Install system dependencies, Node.js, & Chromium menggunakan 'apk' bawaan Alpine
+RUN apk update && apk add --no-cache \
     git \
     curl \
     libpng-dev \
-    libonig-dev \
     libxml2-dev \
     zip \
     unzip \
     openssh-client \
-    # Dependency untuk Playwright/Chromium Headless
+    nodejs \
+    npm \
+    # Dependency & Browser Chromium Headless untuk Playwright
     chromium \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libx14-canvas-graphics \
-    libgtk-3-0
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Install PHP extensions bawaan docker-php
+RUN docker-php-ext-install pdo_mysql bcmath gd
 
-# Install Composer
+# Install Composer terbaru langsung
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Install Node.js 20.20.2 resmi via NodeSource
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs
 
 WORKDIR /app
 COPY . .
 
-# Jalankan instalasi backend & frontend sesuai instruksimu
+# Eksekusi instalasi dependency project & build frontend sesuai instruksi Anda
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# Beri tahu Playwright untuk menggunakan Chromium yang sudah terinstal di sistem
+# Beri tahu Playwright untuk menggunakan Chromium lokal bawaan Alpine (biar hemat & tidak download lagi)
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium
+ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-# Saat container jalan, dia langsung mengeksekusi robot deploy
+# Jalankan robot deployment
 CMD ["node", "deploy.js"]
