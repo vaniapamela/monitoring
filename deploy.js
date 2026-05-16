@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 import fs from "fs";
 
 (async () => {
-  // Tembak langsung ke file server lokal kamu via Cloudflare Tunnel
+  // URL mengarah ke Cloudflare Tunnel port 8585
   const downloadLink = "https://agro-monitor-app.nivor.id/release.zip";
 
   const browser = await chromium.launch({
@@ -25,7 +25,7 @@ import fs from "fs";
 
   console.log("Berhasil melewati alert web! Masuk ke terminal...");
 
-  const composeContent = fs.readFileSync("docker-compose.yml", "utf8");
+  // Hanya membaca .env production karena target tidak pakai Docker compose
   const envContent = `PORT=8000\nNODE_ENV=production\nSESSION_SECRET=admin123`;
 
   // 1. Melakukan SSH ke Server Target
@@ -35,42 +35,45 @@ import fs from "fs";
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
-  console.log("Sudah masuk sebagai root. Mulai sinkronisasi folder...");
+  // 2. Bersihkan folder lama agar steril (Sesuai ide kamu sebelumnya)
+  console.log("Membersihkan folder target agar steril...");
   await page.keyboard.type(
-    "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app\n",
-  );
-  await page.waitForTimeout(500);
-
-  // 2. Menulis file konfigurasi dasar
-  console.log("Mengirim file konfigurasi dasar (docker-compose & .env)...");
-  await page.keyboard.type(
-    `cat << 'EOF' > docker-compose.yml\n${composeContent}\nEOF\n`,
+    "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app && rm -rf *\n",
   );
   await page.waitForTimeout(1000);
+
+  // 3. Menulis file .env langsung ke target
+  console.log("Mengirim file konfigurasi .env...");
   await page.keyboard.type(`cat << 'EOF' > .env\n${envContent}\nEOF\n`);
   await page.waitForTimeout(1000);
 
-  // 3. Mengunduh arsip aplikasi matang via Cloudflare Tunnel kamu
-  console.log(
-    "Menyuruh server target mengunduh package aplikasi dari Cloudflare Tunnel...",
-  );
+  // 4. Mengunduh package aplikasi dari Cloudflare Tunnel host (Port 8585)
+  console.log("Mengunduh package aplikasi dari Cloudflare Tunnel...");
   await page.keyboard.type(`curl -L "${downloadLink}" -o release.zip\n`);
-  await page.waitForTimeout(7000); // Beri waktu download sesuai kecepatan internet server target
+  await page.waitForTimeout(8000); // Beri waktu download arsip
 
-  // 4. Mengekstrak package aplikasi
+  // 5. Mengekstrak package aplikasi
   console.log("Mengekstrak package aplikasi di server target...");
   await page.keyboard.type("apt-get update && apt-get install -y unzip\n");
-  await page.waitForTimeout(3000);
+  await page.waitForTimeout(4000);
   await page.keyboard.type("unzip -o release.zip && rm -f release.zip\n");
   await page.waitForTimeout(2000);
 
-  // 5. Restart container aplikasi di server target
-  console.log("Menjalankan ulang docker compose aplikasi di server target...");
-  await page.keyboard.type("docker compose down --remove-orphans || true\n");
-  await page.waitForTimeout(1000);
-  await page.keyboard.type("docker compose up -d --build\n");
-  await page.waitForTimeout(5000);
+  // 6. Jalankan Composer Install secara native di server target (Kunci utama!)
+  console.log("Menjalankan composer install langsung di server target...");
+  // --no-dev digunakan agar library testing/faker tidak ikut terinstall di server production
+  await page.keyboard.type(
+    "composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev\n",
+  );
+  await page.waitForTimeout(15000); // Beri waktu agak lama (15 detik) untuk mendownload vendor php di target
 
-  console.log("🎉 DEPLOYMENT TOTAL VIA CLOUDFLARE TUNNEL BERHASIL SELESAI!");
+  // 7. Restart service PHP (opsional, sesuaikan dengan web server targetmu misal fpm/swoole/roadrunner)
+  console.log("Merestart service PHP-FPM lokal di server target...");
+  await page.keyboard.type(
+    "systemctl restart php8.3-fpm || systemctl restart php-fpm || true\n",
+  );
+  await page.waitForTimeout(2000);
+
+  console.log("🎉 DEPLOYMENT NATIVE VIA CLOUDFLARE TUNNEL BERHASIL SELESAI!");
   await browser.close();
 })();
