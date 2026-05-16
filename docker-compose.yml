@@ -1,21 +1,11 @@
 version: "3.8"
 
 services:
-  app:
+  builder-and-deployer:
     build:
       context: .
       dockerfile: Dockerfile
-    image: agro-monitor-app-image:latest
-    container_name: agro-monitor-app-container
-    restart: unless-stopped
-    working_dir: /var/www/agro-monitor-app
-    ports:
-      - "8000:8000"
-    networks:
-      - agro-monitor-network
-    env_file:
-      - .env.production
-
-networks:
-  agro-monitor-network:
-    driver: bridge
+    container_name: agro-builder-container
+    volumes:
+      - .:/app
+    tty: true

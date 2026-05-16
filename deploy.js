@@ -1,11 +1,13 @@
-const { chromium } = require("playwright");
-const fs = require("fs");
+import { chromium } from "playwright";
+import fs from "fs";
 
 (async () => {
-  // 1. Jalankan browser di latar belakang
-  const browser = await chromium.launch({ headless: true });
+  // Jalankan browser headless dengan argumen wajib Docker
+  const browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
 
-  // 2. Buat konteks baru dan masukkan kredensial untuk melewati POP-UP ALERT (HTTP Auth)
   const context = await browser.newContext({
     httpCredentials: {
       username: "sija",
@@ -17,51 +19,46 @@ const fs = require("fs");
 
   console.log("Menghubungi pintu gerbang terminal...");
   await page.goto("https://terminal.scholair.my.id/");
-
-  // Tunggu sampai halaman terminal web termuat sepenuhnya
-  // (Sesuaikan selector di bawah ini jika terminal web Anda menggunakan element spesifik)
   await page.waitForLoadState("networkidle");
 
   console.log("Berhasil melewati alert web! Masuk ke terminal...");
 
-  // 3. Baca file docker-compose Anda untuk diketikkan/dikirim via echo ke server target
+  // Mengambil data docker-compose.yml yang ada di workspace saat ini
   const composeContent = fs.readFileSync("docker-compose.yml", "utf8");
   const envContent = `PORT=8000\nNODE_ENV=production\nSESSION_SECRET=admin123`;
 
-  // 4. Simulasi mengetik langsung ke terminal web
-  // Kita lakukan SSH kedua ke root@192.168.200.23 dari dalam terminal tersebut
   await page.keyboard.type("ssh root@192.168.200.23\n");
-  await page.waitForTimeout(2000); // Tunggu prompt password muncul
+  await page.waitForTimeout(2000);
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
-  console.log("Sudah masuk sebagai root di 192.168.200.23. Mulai deploy...");
+  console.log(
+    "Sudah masuk sebagai root di 192.168.200.23. Mulai menyiapkan folder...",
+  );
 
-  // Membuat folder dan menuliskan file konfigurasi di server target
+  // Target folder disesuaikan ke agro-monitor-app
   await page.keyboard.type(
     "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app\n",
   );
   await page.waitForTimeout(500);
 
-  // Kirim isi docker-compose via perintah cat << 'EOF'
+  // Kirim file ke server target via terminal web
   await page.keyboard.type(
     `cat << 'EOF' > docker-compose.yml\n${composeContent}\nEOF\n`,
   );
   await page.waitForTimeout(1000);
 
-  // Kirim isi .env.production
   await page.keyboard.type(
     `cat << 'EOF' > .env.production\n${envContent}\nEOF\n`,
   );
   await page.waitForTimeout(1000);
 
-  // Eksekusi Docker Compose Build & Run langsung di tempat (sesuai docker-compose.yml awal Anda)
-  console.log("Menjalankan docker compose di server target...");
+  console.log("Menjalankan aplikasi di server target...");
   await page.keyboard.type("docker compose down --remove-orphans || true\n");
   await page.waitForTimeout(1000);
   await page.keyboard.type("docker compose up -d --build\n");
-  await page.waitForTimeout(5000); // Tunggu proses build selesai
+  await page.waitForTimeout(5000);
 
-  console.log("Deployment via Robot Web Sukses!");
+  console.log("Deployment via Robot Web di dalam Docker Jenkins Sukses!");
   await browser.close();
 })();

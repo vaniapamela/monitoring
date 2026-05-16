@@ -2,30 +2,26 @@ pipeline {
     agent any
 
     stages {
-        stage('Install Automation Tools') {
+        stage('Checkout Code') {
             steps {
-                echo "=== Menyiapkan NodeJS dan Playwright di Server Jenkins ==="
-                // Menginstal package yang dibutuhkan robot untuk berjalan di Jenkins
-                sh '''
-                    npm init -y
-                    npm install playwright
-                    npx playwright install-deps chromium
-                '''
+                checkout scm
             }
         }
 
-        stage('Execute Web Automation Deploy') {
+        stage('Build & Deploy via Docker Container') {
             steps {
-                echo "=== Menjalankan Robot untuk Menembus terminal.scholair.my.id ==="
-                // Menjalankan script bot yang melewati alert pop-up secara otomatis
-                sh 'node deploy.js'
+                echo "=== Memulai Build & Run di dalam Docker Container ==="
+                # Menjalankan docker compose. Container akan otomatis build PHP, Node, 
+                # lalu mengeksekusi 'node deploy.js' di akhir prosesnya.
+                sh "docker compose up --build --abort-on-container-exit"
             }
         }
     }
 
     post {
         always {
-            echo "=== Pembersihan Workspace ==="
+            echo "=== Pembersihan Environment Jenkins ==="
+            sh "docker compose down --v --remove-orphans"
             cleanWs()
         }
     }

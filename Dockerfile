@@ -1,7 +1,6 @@
-# Gunakan PHP 8.3 FPM
-FROM php:8.3-fpm
+FROM php:8.3-fpm-alpine
 
-# Install system dependencies
+# Install system dependencies & Node.js 20
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -9,7 +8,14 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     zip \
-    unzip
+    unzip \
+    openssh-client \
+    # Dependency untuk Playwright/Chromium Headless
+    chromium \
+    libnss3 \
+    libatk-bridge2.0-0 \
+    libx14-canvas-graphics \
+    libgtk-3-0
 
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
@@ -17,30 +23,21 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install Node.js & NPM
+# Install Node.js 20.20.2 resmi via NodeSource
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@10.8.2
+    && apt-get install -y nodejs
 
-# Set working directory
-WORKDIR /var/www/agro-monitor-app
-
-# Salin file project
+WORKDIR /app
 COPY . .
 
-# --- TAMBAHKAN INI AGAR JENKINS TIDAK ERROR ---
-# Install PHP dependencies (Vendor)
-RUN composer install --no-interaction --optimize-autoloader
+# Jalankan instalasi backend & frontend sesuai instruksimu
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN npm install
+RUN npm run build
 
-# Install JS dependencies & Build (jika kamu pakai Vite/Tailwind)
-# RUN npm install && npm run build
-# ----------------------------------------------
+# Beri tahu Playwright untuk menggunakan Chromium yang sudah terinstal di sistem
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium
 
-# Berikan izin akses folder storage & cache
-RUN chown -R www-data:www-data /var/www/agro-monitor-app/storage /var/www/agro-monitor-app/bootstrap/cache
-
-# Port yang dibuka
-EXPOSE 8000
-
-# CMD hanya boleh SATU. Pilih artisan serve untuk staging.
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# Saat container jalan, dia langsung mengeksekusi robot deploy
+CMD ["node", "deploy.js"]
