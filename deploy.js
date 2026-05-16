@@ -5,9 +5,11 @@ import fs from "fs";
   // Jalankan browser headless dengan argumen wajib Docker
   const browser = await chromium.launch({
     headless: true,
+    executablePath:
+      process.env.PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH ||
+      "/usr/bin/chromium-browser",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
-
   const context = await browser.newContext({
     httpCredentials: {
       username: "sija",
