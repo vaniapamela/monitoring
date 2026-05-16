@@ -26,6 +26,17 @@ import playwright from "playwright";
   await page.keyboard.type("git pull origin main || git pull origin master\n");
   await page.waitForTimeout(8000); // Jeda waktu tarik data dari internet
 
+  // --- [BARU] LANGKAH 1B: BUILD ASET FRONTEND (NODE.JS) ---
+  console.log(
+    "1b. Menginstal dependency Node.js dan melakukan kompilasi aset (Build)...",
+  );
+  // Jalankan npm install untuk memperbarui paket, lalu compile aset frontend
+  await page.keyboard.type("npm install\n");
+  await page.waitForTimeout(15000); // Beri waktu lebih lama karena install npm butuh waktu
+
+  await page.keyboard.type("npm run build\n");
+  await page.waitForTimeout(10000); // Tunggu proses compiling selesai
+
   // --- LANGKAH 2: MANAJEMEN ENVIRONMENT FILE (.env) ---
   console.log("2. Menyetel file environment (.env.production -> .env)...");
   // Cari .env.production, jika ada salin menjadi .env. Jika tidak ada, buat dari .env.example
