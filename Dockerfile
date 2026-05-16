@@ -32,10 +32,6 @@ RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# --- PERBAIKAN: Kecualikan vendor agar file zip kecil dan tidak crash ---
-RUN apk add --no-cache zip && \
-    zip -r /tmp/release.zip . -x "*.git*" "node_modules/*" "vendor/*"
-
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 ENV PLAYWRIGHT_LAUNCH_OPTIONS_EXECUTABLE_PATH=/usr/bin/chromium-browser
 

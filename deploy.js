@@ -25,23 +25,32 @@ import fs from "fs";
   const composeContent = fs.readFileSync("docker-compose.yml", "utf8");
   const envContent = `PORT=8000\nNODE_ENV=production\nSESSION_SECRET=admin123`;
 
-  // Sekarang membaca zip yang sudah dijamin super kecil/ringan
-  const zipBase64 = fs.readFileSync("/tmp/release.zip").toString("base64");
-
   await page.keyboard.type("ssh root@192.168.200.23\n");
   await page.waitForTimeout(2000);
   await page.keyboard.type("admin123\n");
   await page.waitForTimeout(2000);
 
   console.log(
-    "Sudah masuk sebagai root di 192.168.200.23. Mulai sinkronisasi file...",
+    "Sudah masuk sebagai root di 192.168.200.23. Mulai sinkronisasi via Git...",
   );
 
+  // 1. Pastikan folder git sudah ada, jika belum lakukan clone pertama kali
   await page.keyboard.type(
-    "mkdir -p /var/www/agro-monitor-app && cd /var/www/agro-monitor-app\n",
+    "git config --global --add safe.directory /var/www/agro-monitor-app\n",
   );
-  await page.waitForTimeout(500);
+  await page.keyboard.type(
+    'if [ ! -d "/var/www/agro-monitor-app/.git" ]; then git clone https://github.com/vaniapamela/monitoring.git /var/www/agro-monitor-app; fi\n',
+  );
+  await page.waitForTimeout(3000);
 
+  // 2. Masuk ke folder dan tarik code terbaru
+  await page.keyboard.type(
+    "cd /var/www/agro-monitor-app && git fetch --all && git reset --hard origin/main\n",
+  );
+  await page.waitForTimeout(3000);
+
+  console.log("Memperbarui file konfigurasi env & docker-compose...");
+  // 3. Tulis ulang docker-compose dan .env terbaru dari Jenkins
   await page.keyboard.type(
     `cat << 'EOF' > docker-compose.yml\n${composeContent}\nEOF\n`,
   );
@@ -50,31 +59,13 @@ import fs from "fs";
   await page.keyboard.type(`cat << 'EOF' > .env\n${envContent}\nEOF\n`);
   await page.waitForTimeout(1000);
 
-  console.log("Mengirim source code aplikasi (Ramping)...");
-  await page.keyboard.type(
-    `cat << 'EOF' > release.zip.base64\n${zipBase64}\nEOF\n`,
-  );
-  await page.waitForTimeout(2000);
-
-  console.log("Mengekstrak source code di server target...");
-  await page.keyboard.type(
-    "base64 -d release.zip.base64 > release.zip && rm -f release.zip.base64\n",
-  );
-  await page.waitForTimeout(1000);
-
-  // Pastikan server target punya unzip untuk bongkar file
-  await page.keyboard.type("apt-get update && apt-get install -y unzip\n");
-  await page.waitForTimeout(3000);
-  await page.keyboard.type("unzip -o release.zip && rm -f release.zip\n");
-  await page.waitForTimeout(2000);
-
-  // Jalankan aplikasi via Docker Compose di server target
+  // 4. Jalankan aplikasi via Docker Compose di server target
   console.log("Menjalankan docker compose di server target...");
   await page.keyboard.type("docker compose down --remove-orphans || true\n");
   await page.waitForTimeout(1000);
   await page.keyboard.type("docker compose up -d --build\n");
   await page.waitForTimeout(5000);
 
-  console.log("Deployment TOTAL (Code + Config) Sukses tanpa overload!");
+  console.log("Deployment TOTAL via Git & Docker Sukses Tanpa Hambatan!");
   await browser.close();
 })();
