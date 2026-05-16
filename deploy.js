@@ -50,8 +50,15 @@ import fs from "fs";
 
   // 4. Mengunduh package aplikasi dari Cloudflare Tunnel host (Port 8585)
   console.log("Mengunduh package aplikasi dari Cloudflare Tunnel...");
-  await page.keyboard.type(`curl -L "${downloadLink}" -o release.zip\n`);
-  await page.waitForTimeout(8000); // Beri waktu download arsip
+  // Hapus file lama jika ada, lalu download. Jika sukses, munculkan teks DOWNLOAD_DONE
+  await page.keyboard.type(
+    `rm -f release.zip && curl -L "${downloadLink}" -o release.zip && echo "DOWNLOAD_DONE"\n`,
+  );
+
+  console.log("Menunggu proses download selesai (jangan diganggu)...");
+  // Menggantikan waitForTimeout(8000), robot akan setia menunggu sampai download selesai 100%
+  await page.waitForSelector('text="DOWNLOAD_DONE"', { timeout: 300000 });
+  await page.waitForTimeout(1000);
 
   // 5. Mengekstrak package aplikasi
   console.log("Mengekstrak package aplikasi di server target...");
