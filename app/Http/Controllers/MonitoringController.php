@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SensorData;
+use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MonitoringController extends Controller
 {
     public function index(Request $request)
     {
-        $latest = SensorData::latest()->first();
+        $userId = Auth::id();
 
-        $chartData = SensorData::latest()
+        // Mengambil data terbaru spesifik milik user yang login
+        $latest = SensorData::where('user_id', $userId)->latest()->first();
+
+        // Data Chart (10 data terakhir, dibalik agar urutan waktu dari kiri ke kanan)
+        $chartData = SensorData::where('user_id', $userId)
+            ->latest()
             ->take(10)
             ->get()
             ->reverse();
@@ -19,40 +26,28 @@ class MonitoringController extends Controller
         $warehouseStatus = 'STANDBY';
 
         if ($latest) {
-
-            if (
-                $latest->temperature > 30 ||
-                $latest->humidity > 85
-            ) {
-
+            if ($latest->temperature > 30 || $latest->humidity > 85) {
                 $warehouseStatus = 'TIDAK AMAN';
-
             } else {
-
                 $warehouseStatus = 'AMAN';
             }
         }
 
-        $query = SensorData::latest();
-
+        // Mulai kueri riwayat berdasarkan user_id
+        $query = SensorData::where('user_id', $userId)->latest();
         $filter = $request->status;
 
         if ($filter == 'aman') {
-
-            $query->where('temperature', '<=', 20)
-                  ->where('humidity', '<=', 90);
-
+            $query->where('temperature', '<=', 25)
+                  ->where('humidity', '<=', 95);
         } elseif ($filter == 'tidak_aman') {
-
             $query->where(function ($q) {
-
-                $q->where('temperature', '>', 20)
-                  ->orWhere('humidity', '>', 90);
-
+                $q->where('temperature', '>', 25)
+                  ->orWhere('humidity', '>', 95);
             });
         }
 
-        $history = $query->take(10)->get();
+        $history = $query->take(50)->get(); // Mengambil maksimal 50 riwayat untuk efisiensi halaman
 
         return view('monitoring', [
             'latest' => $latest,
@@ -61,5 +56,33 @@ class MonitoringController extends Controller
             'chartData' => $chartData,
             'filter' => $filter
         ]);
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $userId = Auth::id();
+        $query = SensorData::where('user_id', $userId)->latest();
+        $filter = $request->status;
+
+        if ($filter == 'aman') {
+            $query->where('temperature', '<=', 30)
+                  ->where('humidity', '<=', 85);
+        } elseif ($filter == 'tidak_aman') {
+            $query->where(function ($q) {
+                $q->where('temperature', '>', 30)
+                  ->orWhere('humidity', '>', 85);
+            });
+        }
+
+        $history = $query->get();
+        $date = now()->format('d-m-Y_H-i');
+
+        $pdf = Pdf::loadView('emails.monitoring-pdf', [
+            'history' => $history,
+            'filter' => $filter,
+            'user' => Auth::user()
+        ]);
+
+        return $pdf->download("AgroMonitor_Report_{$filter}_{$date}.pdf");
     }
 }

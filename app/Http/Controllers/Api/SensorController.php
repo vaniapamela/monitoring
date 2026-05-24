@@ -8,32 +8,38 @@ use App\Models\SensorData;
 
 class SensorController extends Controller
 {
+    
     public function store(Request $request)
-    {
-        $temperature = $request->temperature;
-        $humidity = $request->humidity;
+{
+    $request->validate([
+        'temperature' => 'required|numeric',
+        'humidity' => 'required|numeric'
+    ]);
 
-        $fanStatus = 'OFF';
+    $temperature = $request->temperature;
+    $humidity = $request->humidity;
 
-        // Logika otomatis sederhana
-        if ($temperature > 20) {
-            $fanStatus = 'ON';
-        }
+    $fanStatus = 'OFF';
 
-        SensorData::create([
+    // Otomatis nyalakan fan jika suhu > 20
+    if ($temperature > 20) {
+        $fanStatus = 'ON';
+    }
+
+    SensorData::create([
+        'temperature' => $temperature,
+        'humidity' => $humidity,
+        'fan_status' => $fanStatus
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Data sensor berhasil disimpan',
+        'data' => [
             'temperature' => $temperature,
             'humidity' => $humidity,
             'fan_status' => $fanStatus
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data sensor berhasil disimpan',
-            'data' => [
-                'temperature' => $temperature,
-                'humidity' => $humidity,
-                'fan_status' => $fanStatus
-            ]
-        ]);
-    }
+        ]
+    ]);
+}
 }
