@@ -31,6 +31,46 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
+
+    /* Kreatif & Interaktif style untuk Team Cards */
+    .team-card {
+        background: white;
+        border: 1px solid #f1f5f9;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .team-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981, #3b82f6);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .team-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.1);
+        border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .team-card:hover::after {
+        transform: scaleX(1);
+    }
+
+    .team-avatar {
+        transition: all 0.4s ease;
+    }
+
+    .team-card:hover .team-avatar {
+        transform: scale(1.05) rotate(2deg);
+        box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.2);
+    }
 </style>
 
 <!-- Header Section -->
@@ -47,7 +87,7 @@
 </div>
 
 <div class="max-w-7xl mx-auto px-6 -mt-20 pb-24">
-    <div class="grid lg:grid-cols-12 gap-8">
+    <div class="grid lg:grid-cols-12 gap-8 mb-20">
         
         <!-- Kolom Kiri: Profil Brand -->
         <div class="lg:col-span-4" data-aos="fade-up">
@@ -134,6 +174,94 @@
 
         </div>
     </div>
+
+    <!-- ==========================================================================
+         SECTION: 8 PROFIL PEMBUAT / DEVELOPER TEAM (DENGAN FOTO)
+         ========================================================================== -->
+    <div class="mt-28">
+        <div class="text-center max-w-2xl mx-auto mb-16" data-aos="fade-up">
+            <span class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-full uppercase tracking-widest">
+                Our Innovation Brains
+            </span>
+            <h3 class="text-4xl font-black text-slate-900 tracking-tight uppercase mt-4 mb-2">
+                Tim Pengembang System
+            </h3>
+            <p class="text-slate-400 font-medium text-sm">
+                Inovator dan teknisi di balik arsitektur perangkat keras IoT serta ekosistem digital AgroMonitor.
+            </p>
+        </div>
+
+        @php
+            // Data 8 personil lengkap dengan nama file foto masing-masing di folder public/images/team/
+            $team_members = [
+                ['name' => 'Vania Pamela Fri masfufah', 'nisn' => '0084196508', 'email' => 'vaniafrimasfufah@gmail.com', 'role' => 'Project Manager', 'bg_badge' => 'bg-emerald-100 text-emerald-700', 'photo' => 'images/team/vania.jpg'],
+                ['name' => 'Indri Ratna Ferlina', 'nisn' => '0079933702', 'email' => 'ratnaindri3005@gmail.com', 'role' => 'Product Researcher', 'bg_badge' => 'bg-blue-100 text-blue-700', 'photo' => 'images/team/indri.jpg'],
+                ['name' => 'Selvi Anggraeni', 'nisn' => '0081581935', 'email' => 'selvianggraeni700@gmail.com', 'role' => 'System Analyst', 'bg_badge' => 'bg-teal-100 text-teal-700', 'photo' => 'images/team/selvi.jpg'],
+                ['name' => 'Rheza Alentta', 'nisn' => '0086713080', 'email' => 'rhezaalenta6@gmail.com', 'role' => 'IoT Hardware Engineer', 'bg_badge' => 'bg-purple-100 text-purple-700', 'photo' => 'images/team/rheza.jpg'],
+                ['name' => 'Novia Anggi Natasya', 'nisn' => '0079878410', 'email' => 'novianggi07@icloud.com', 'role' => 'UI/UX Designer', 'bg_badge' => 'bg-rose-100 text-rose-700', 'photo' => 'images/team/novia.jpg'],
+                ['name' => 'Zaky Virman Abi Fikhri', 'nisn' => '0077953415', 'email' => 'zakyvirmanabi32@gmail.com', 'role' => 'Frontend Developer', 'bg_badge' => 'bg-cyan-100 text-cyan-700', 'photo' => 'images/team/zaky.jpg'],
+                ['name' => 'Indah Firdlotul Azizah', 'nisn' => '0079593879', 'email' => 'indahazizah978@gmail.com', 'role' => 'Backend Developer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/indah.jpg'],
+                ['name' => 'Laila Putri Rahmawati', 'nisn' => '0083645844', 'email' => 'lalarahmawati50@gmail.com', 'role' => 'Backend Developer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/laila.jpg'],
+            ];
+        @endphp
+
+        <!-- Grid Container 8 Profile -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            @foreach($team_members as $index => $member)
+            <div class="team-card p-8 rounded-[2.5rem]" 
+                 data-aos="fade-up" 
+                 data-aos-delay="{{ ($index % 4) * 100 }}">
+                
+                <div class="relative flex justify-center mb-6">
+                    <!-- Lingkaran Ornamen Belakang Foto -->
+                    <div class="absolute inset-0 bg-slate-50 rounded-full scale-90 -z-10"></div>
+                    
+                    <!-- Avatar Foto Berbasis Gambar & Fallback Huruf Otomatis -->
+                    <div class="team-avatar w-32 h-32 rounded-[2.5rem] bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center shadow-md border-4 border-white overflow-hidden select-none">
+                        @if(file_exists(public_path($member['photo'])))
+                            <img src="{{ asset($member['photo']) }}" alt="{{ $member['name'] }}" class="w-full h-full object-cover">
+                        @else
+                            <!-- Tampil otomatis jika file foto belum ada di folder komputer -->
+                            <span class="text-4xl font-black">{{ substr($member['name'], 0, 1) }}</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <!-- Badge Peran Anggota -->
+                    <span class="inline-block px-3 py-1 text-[9px] font-extrabold uppercase rounded-lg tracking-wider mb-3 {{ $member['bg_badge'] }}">
+                        {{ $member['role'] }}
+                    </span>
+
+                    <!-- Nama Lengkap -->
+                    <h4 class="text-base font-black text-slate-800 tracking-tight mb-1 truncate px-1" title="{{ $member['name'] }}">
+                        {{ $member['name'] }}
+                    </h4>
+                    
+                    <!-- Detail Informasi Kolektif -->
+                    <div class="space-y-3 mt-4 pt-4 border-t border-slate-50 text-left">
+                        <div>
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Identification Number</p>
+                            <p class="text-[11px] font-bold text-slate-600 font-mono bg-slate-50 px-2 py-1 rounded-md inline-block">
+                                NISN: {{ $member['nisn'] }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Corporate Mail</p>
+                            <a href="mailto:{{ $member['email'] }}" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors flex items-center gap-1 truncate" title="{{ $member['email'] }}">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                {{ $member['email'] }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            @endforeach
+        </div>
+    </div>
+
 </div>
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>

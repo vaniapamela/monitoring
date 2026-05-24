@@ -56,7 +56,7 @@
                     <div class="bg-emerald-100 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">📍</div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Kantor Pusat</h3>
                     <p class="text-base font-bold text-slate-800 leading-relaxed">
-                        Jl. Agroteknologi No. 123, <br>Kawasan Industri Hijau, Jakarta
+                        Jl.Ki Ageng Gribig No 19, <br>Kedung Kandang, Malang
                     </p>
                 </div>
 
@@ -72,7 +72,7 @@
                      data-aos="fade-right" data-aos-delay="300">
                     <div class="bg-rose-100 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">✉️</div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Support</h3>
-                    <p class="text-base font-bold text-slate-800">support@agromonitor.id</p>
+                    <p class="text-base font-bold text-slate-800">support @agrocorporate</p>
                 </div>
             </div>
 
@@ -87,39 +87,66 @@
                     </p>
                 </div>
 
-                <form action="#" method="POST" class="space-y-8">
+                <!-- ALERTS UNTUK MENAMPILKAN STATUS DARI SERVER GMAIL -->
+                @if(session('success'))
+                    <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 font-bold text-sm shadow-lg shadow-emerald-500/20" data-aos="fade-down">
+                        🎉 {{ session('success') }}
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="bg-rose-500 text-white p-4 rounded-2xl mb-6 font-bold text-sm shadow-lg shadow-rose-500/20" data-aos="fade-down">
+                        ❌ {{ session('error') }}
+                    </div>
+                @endif
+
+                <!-- FORM UTAMA YANG TERHUBUNG KE ROUTE LARAVEL -->
+                <form action="{{ route('contact.send') }}" method="POST" class="space-y-8">
                     @csrf
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="group">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Nama Lengkap</label>
-                            <input type="text" placeholder="Vania Utama" 
+                            <input type="text" name="name" placeholder="Vania Utama" required
+                                value="{{ old('name') }}"
                                 class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
+                            @error('name')
+                                <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
+                            @enderror
                         </div>
+                        
                         <div class="group">
                             <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Alamat Email</label>
-                            <input type="email" placeholder="vania@email.com" 
+                            <input type="email" name="email" placeholder="vania@email.com" required
+                                value="{{ old('email') }}"
                                 class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
+                            @error('email')
+                                <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="group">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Subjek Kebutuhan</label>
-                        <select class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer">
-                            <option>🔧 Masalah Hardware (ESP8266/DHT11)</option>
-                            <option>💻 Integrasi Dashboard Web</option>
-                            <option>🌱 Konsultasi Cold Storage</option>
-                            <option>❓ Tanya Lainnya</option>
+                        <select name="subject" class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer">
+                            <option value="Masalah Hardware (ESP8266/DHT11)" {{ old('subject') == 'Masalah Hardware (ESP8266/DHT11)' ? 'selected' : '' }}>🔧 Masalah Hardware (ESP8266/DHT11)</option>
+                            <option value="Integrasi Dashboard Web" {{ old('subject') == 'Integrasi Dashboard Web' ? 'selected' : '' }}>💻 Integrasi Dashboard Web</option>
+                            <option value="Konsultasi Cold Storage" {{ old('subject') == 'Konsultasi Cold Storage' ? 'selected' : '' }}>🌱 Konsultasi Cold Storage</option>
+                            <option value="Tanya Lainnya" {{ old('subject') == 'Tanya Lainnya' ? 'selected' : '' }}>❓ Tanya Lainnya</option>
                         </select>
                     </div>
 
                     <div class="group">
                         <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Detail Pesan</label>
-                        <textarea rows="5" placeholder="Jelaskan kendala atau pertanyaan Anda secara mendetail..." 
-                            class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all resize-none"></textarea>
+                        <textarea name="message" rows="5" placeholder="Jelaskan kendala atau pertanyaan Anda secara mendetail..." required
+                            class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all resize-none">{{ old('message') }}</textarea>
+                        @error('message')
+                            <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <button type="submit" 
-                        class="w-full bg-emerald-600 text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transform hover:-translate-y-2 transition-all shadow-xl shadow-emerald-900/20 active:scale-95">
+                        class="w-full bg-emerald-600 text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transform hover:-translate-y-2 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 cursor-pointer border-none">
                         Kirim Pesan Sekarang
                     </button>
                 </form>
@@ -131,7 +158,7 @@
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     AOS.init({
-        once: true, // Animasi hanya berjalan sekali saat scroll
+        once: true, 
         duration: 800,
         offset: 100
     });
