@@ -103,6 +103,7 @@ class MonitoringController extends Controller
             'device_id' => $device->id,
             'temperature' => $request->temperature,
             'humidity' => $request->humidity,
+            'fan_status' => $request->fan_status,
         ]);
 
         return response()->json(['message' => 'Data Diterima'], 200);

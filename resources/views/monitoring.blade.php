@@ -273,7 +273,7 @@
                     <tbody class="divide-y divide-slate-50">
                         @forelse($history as $item)
                             @php
-                                $isAman = $item->temperature <= 30 && $item->humidity <= 85;
+                                $isAman = $item->temperature >= 25 && $item->humidity >= 90;
                             @endphp
                             <tr class="hover:bg-slate-50/50 transition-colors group">
                                 <td class="p-6 text-center font-digital font-bold text-slate-400 text-xs">
