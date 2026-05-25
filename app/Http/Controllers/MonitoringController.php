@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SensorData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
@@ -88,29 +87,5 @@ class MonitoringController extends Controller
         ]);
 
         return $pdf->download("AgroMonitor_Report_{$date}.pdf");
-    }
-
-    public function storeSensorData(Request $request)
-    {
-        // Cari perangkat berdasarkan token yang dikirim ESP8266
-        $device = DeviceModel::where('token', $request->token)->first();
-
-        if (! $device) {
-            return response()->json(['message' => 'Token Tidak Dikenali'], 403);
-        }
-
-        // 2. Ambil waktu Jakarta detik ini juga
-        $waktuLokal = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
-
-        // 3. Masukkan ke database dengan memaksa created_at & updated_at pake waktu lokal
-        $sensor = SensorData::create([
-            'temperature' => $validated['temperature'],
-            'humidity' => $validated['humidity'],
-            'fan_status' => $validated['fan_status'],
-            'created_at' => $waktuLokal, // Paksa timpa created_at
-            'updated_at' => $waktuLokal, // Paksa timpa updated_at
-        ]);
-
-        return response()->json(['message' => 'Data Diterima'], 200);
     }
 }
