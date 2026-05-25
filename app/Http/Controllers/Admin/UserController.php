@@ -13,10 +13,10 @@ class UserController extends Controller
 {
     public function index()
     {
-        // Pastikan relasi 'devices' sudah didefinisikan di Model User
-        $users = User::with(['devices'])
-            ->where('id', '!=', auth()->id())
-            ->get();
+        
+       $users = User::with(['sensorData'])
+    ->where('id', '!=', auth()->id())
+    ->get();
 
         $totalLogins = User::sum('login_count');
         $usersLoggedInToday = User::whereDate('last_login_at', today())->count();
