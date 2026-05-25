@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SensorData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
-=======
 use Illuminate\Pagination\LengthAwarePaginator;
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
 use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
@@ -55,45 +52,31 @@ class MonitoringController extends Controller
         $query = SensorData::whereIn('device_id', $deviceIds)->latest();
         $filter = $request->status;
 
-<<<<<<< HEAD
         if ($filter == 'aman') {
-            $query->where('temperature', '<=', 25)
-                ->where('humidity', '<=', 95);
+
+            $query->whereBetween('temperature', [20, 25])
+                ->whereBetween('humidity', [60, 90]);
+
         } elseif ($filter == 'tidak_aman') {
+
             $query->where(function ($q) {
-                $q->where('temperature', '>', 25)
-                    ->orWhere('humidity', '>', 95);
+
+                $q->where('temperature', '<', 20)
+                    ->orWhere('temperature', '>', 25)
+                    ->orWhere('humidity', '<', 60)
+                    ->orWhere('humidity', '>', 90);
+
             });
+
         }
-=======
-       if ($filter == 'aman') {
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
 
-    $query->whereBetween('temperature', [20, 25])
-          ->whereBetween('humidity', [60, 90]);
-
-} elseif ($filter == 'tidak_aman') {
-
-    $query->where(function ($q) {
-
-        $q->where('temperature', '<', 20)
-          ->orWhere('temperature', '>', 25)
-          ->orWhere('humidity', '<', 60)
-          ->orWhere('humidity', '>', 90);
-
-    });
-
-}
         return view('monitoring', [
             'latest' => $latest,
             'warehouseStatus' => $warehouseStatus,
             'history' => $query->paginate(10),
             'chartData' => $chartData,
             'filter' => $filter,
-<<<<<<< HEAD
-=======
             'error_message' => null, // Tidak ada error
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
         ]);
     }
 
@@ -101,20 +84,9 @@ class MonitoringController extends Controller
     {
         $user = Auth::user();
 
-<<<<<<< HEAD
-        if ($filter == 'aman') {
-            $query->where('temperature', '<=', 30)
-                ->where('humidity', '<=', 85);
-        } elseif ($filter == 'tidak_aman') {
-            $query->where(function ($q) {
-                $q->where('temperature', '>', 30)
-                    ->orWhere('humidity', '>', 85);
-            });
-=======
         // Proteksi download bagi admin
         if ($user->role === 'admin') {
             return redirect()->route('admin.users.index');
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
         }
 
         $deviceIds = $user->devices()->pluck('id');
@@ -131,19 +103,12 @@ class MonitoringController extends Controller
 
         $pdf = Pdf::loadView('emails.monitoring-pdf', [
             'history' => $history,
-<<<<<<< HEAD
-            'filter' => $filter,
-            'user' => Auth::user(),
-=======
             'filter' => $request->status,
             'user' => $user,
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
         ]);
 
         return $pdf->download("AgroMonitor_Report_{$date}.pdf");
     }
-<<<<<<< HEAD
-=======
 
     public function storeSensorData(Request $request)
     {
@@ -163,5 +128,4 @@ class MonitoringController extends Controller
 
         return response()->json(['message' => 'Data Diterima'], 200);
     }
->>>>>>> 1e277a65e8691eac062f6adb3e50918c8c95f866
 }

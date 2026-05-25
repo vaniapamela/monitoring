@@ -106,10 +106,6 @@
                                 class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-emerald-600 transition-colors no-underline">
                                 Masuk
                             </a>
-                            <a href="{{ route('register') }}"
-                                class="text-xs font-black uppercase tracking-widest bg-emerald-500 text-white px-4 py-2.5 rounded-xl hover:bg-emerald-600 transition-colors no-underline shadow-md shadow-emerald-500/10">
-                                Daftar
-                            </a>
                         </div>
                     @endauth
                 </div>
