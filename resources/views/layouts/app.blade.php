@@ -195,10 +195,6 @@
                         class="w-full text-center py-3 border border-slate-200 text-slate-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-all no-underline">
                         Masuk
                     </a>
-                    <a href="{{ route('register') }}"
-                        class="w-full text-center py-3 bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-md shadow-emerald-500/10 no-underline">
-                        Daftar
-                    </a>
                 </div>
             @endauth
         </div>
