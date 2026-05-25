@@ -15,10 +15,15 @@ class SensorData extends Model
     // Tambahkan 'device_id' ke dalam fillable agar bisa disimpan nanti
     protected $fillable = ['temperature', 'humidity', 'device_id', 'created_at', 'updated_at'];
 
-    protected $casts = [
-        'created_at' => 'datetime:Y-m-d H:i:s',
-        'updated_at' => 'datetime:Y-m-d H:i:s',
-    ];
+    protected static function booted()
+    {
+        // Sebelum data disimpan (creating), paksa set waktu ke Jakarta
+        static::creating(function ($model) {
+            $waktuLokal = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
+            $model->created_at = $waktuLokal;
+            $model->updated_at = $waktuLokal;
+        });
+    }
 
     // Relasi balik: Data sensor ini milik device yang mana?
     public function device()
