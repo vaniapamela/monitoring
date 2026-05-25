@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\SensorData;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
 {
@@ -39,11 +39,11 @@ class MonitoringController extends Controller
 
         if ($filter == 'aman') {
             $query->where('temperature', '<=', 25)
-                  ->where('humidity', '<=', 95);
+                ->where('humidity', '<=', 95);
         } elseif ($filter == 'tidak_aman') {
             $query->where(function ($q) {
                 $q->where('temperature', '>', 25)
-                  ->orWhere('humidity', '>', 95);
+                    ->orWhere('humidity', '>', 95);
             });
         }
 
@@ -54,7 +54,7 @@ class MonitoringController extends Controller
             'warehouseStatus' => $warehouseStatus,
             'history' => $history,
             'chartData' => $chartData,
-            'filter' => $filter
+            'filter' => $filter,
         ]);
     }
 
@@ -66,11 +66,11 @@ class MonitoringController extends Controller
 
         if ($filter == 'aman') {
             $query->where('temperature', '<=', 30)
-                  ->where('humidity', '<=', 85);
+                ->where('humidity', '<=', 85);
         } elseif ($filter == 'tidak_aman') {
             $query->where(function ($q) {
                 $q->where('temperature', '>', 30)
-                  ->orWhere('humidity', '>', 85);
+                    ->orWhere('humidity', '>', 85);
             });
         }
 
@@ -80,7 +80,7 @@ class MonitoringController extends Controller
         $pdf = Pdf::loadView('emails.monitoring-pdf', [
             'history' => $history,
             'filter' => $filter,
-            'user' => Auth::user()
+            'user' => Auth::user(),
         ]);
 
         return $pdf->download("AgroMonitor_Report_{$filter}_{$date}.pdf");
