@@ -183,20 +183,29 @@
                     System_Logs</h4>
                 <div class="space-y-4 overflow-y-auto max-h-[350px] pr-2">
                     @foreach ($history->take(5) as $item)
+                        @php
+                            $isAman = $item->temperature <= 25 && $item->humidity <= 90;
+                        @endphp
+
                         <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                             <div class="flex justify-between items-center">
                                 <div>
-                                    <p class="font-bold text-slate-700 text-sm font-digital">{{ $item->temperature }}°C /
-                                        {{ $item->humidity }}%</p>
+                                    <p class="font-bold text-slate-700 text-sm font-digital">
+                                        {{ $item->temperature }}°C / {{ $item->humidity }}%
+                                    </p>
                                     <p class="text-[10px] text-slate-400 mt-1 font-digital">
-                                        {{ $item->created_at->isoFormat('H:i:s / d M') }}</p>
+                                        {{ $item->created_at->isoFormat('H:i:s / d M') }}
+                                    </p>
                                 </div>
-                                @if ($item->temperature > 30 || $item->humidity > 85)
+                                @if ($isAman)
                                     <span
-                                        class="bg-rose-100 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full">ALERT</span>
+                                        class="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full">
+                                        SAFE
+                                    </span>
                                 @else
-                                    <span
-                                        class="bg-emerald-100 text-emerald-600 text-[10px] font-black px-3 py-1 rounded-full">SAFE</span>
+                                    <span class="bg-rose-100 text-rose-600 text-[10px] font-black px-3 py-1 rounded-full">
+                                        ALERT
+                                    </span>
                                 @endif
                             </div>
                         </div>
@@ -262,6 +271,8 @@
                             <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Suhu Udara</th>
                             <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Kelembapan</th>
                             <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Status Kipas</th>
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Status Humidifier
+                            </th>
                             <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold text-center">Status
                                 Keamanan</th>
                             <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Waktu Sinkronisasi
@@ -296,6 +307,12 @@
                                     <span
                                         class="px-3 py-1.5 rounded-xl text-[11px] font-bold font-digital {{ ($item->fan_status ?? 'OFF') == 'ON' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-100 text-slate-500' }}">
                                         ⚙️ {{ $item->fan_status ?? 'OFF' }}
+                                    </span>
+                                </td>
+                                <td class="p-6">
+                                    <span
+                                        class="px-3 py-1.5 rounded-xl text-[11px] font-bold font-digital {{ ($item->fan_status ?? 'OFF') == 'ON' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-100 text-slate-500' }}">
+                                        ⚙️ {{ $item->humidifier_status ?? 'OFF' }}
                                     </span>
                                 </td>
                                 <td class="p-6 text-center">
