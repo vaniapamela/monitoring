@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SensorData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
