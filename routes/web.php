@@ -2,84 +2,66 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MonitoringController;
-use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Support\Facades\Route;
-
-
-/*
-|--------------------------------------------------------------------------
-| 1. Halaman Publik (Bisa Diakses Semua Orang Tanpa Login)
-|--------------------------------------------------------------------------
-*/
-Route::get('/', function () {
-    return view('home'); // Mengembalikan ke halaman utama AgroMonitor kamu
-});
-
-Route::get('/about', function () {
-    return view('about');
-});
-
-// Halaman untuk menampilkan form kontak
-Route::get('/contact', function () {
-    return view('contact');
-});
-
-// Memproses pengiriman email dari form kontak
-Route::post('/contact', [ContactController::class, 'sendEmail'])->name('contact.send');
-
-// Hortikultura bisa diakses tanpa login
-Route::get('/hortikultura', function () {
-    return view('hortikultura');
-})->name('hortikultura');
-
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
-| 2. Halaman Khusus Penyewa & Admin (Wajib Login & Cek Peran/Role)
+| 1. Halaman Publik (Bebas Akses)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'checkRole:tenant,admin'])->group(function () {
-    // Halaman Utama Monitoring IoT kamu (Hanya User 1 / Tenant & Admin)
+Route::get('/', fn() => view('home'));
+Route::get('/about', fn() => view('about'));
+Route::get('/contact', fn() => view('contact'));
+Route::get('/hortikultura', fn() => view('hortikultura'))->name('hortikultura');
+
+/*
+|--------------------------------------------------------------------------
+| 2. Dashboard (Pembagi Arah)
+|--------------------------------------------------------------------------
+*/
+Route::get('/dashboard', function () {
+    if (Auth::user()->role === 'admin') {
+        return redirect()->route('admin.users.index');
+    }
+    return redirect()->route('monitoring');
+})->middleware(['auth'])->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| 3. Monitoring (Bisa diakses semua user login)
+| Logika "Kosong" atau "Realtime" diatur di MonitoringController
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
     Route::get('/monitoring', [MonitoringController::class, 'index'])->name('monitoring');
-    Route::get('/dashboard', [MonitoringController::class, 'index'])->name('dashboard');
-    
-    // Route untuk mengunduh laporan PDF riwayat sensor (Mendukung Filter)
     Route::get('/monitoring/pdf', [MonitoringController::class, 'downloadPdf'])->name('monitoring.pdf');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| 3. Halaman Terproteksi Umum (Wajib Login Saja, Semua Role Bisa Akses)
+| 4. Profil (Semua login bisa akses)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    // Fitur Edit Profil bawaan Laravel Breeze (Bisa diakses oleh tenant, guest, maupun admin)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| 4. Halaman Khusus Admin (Hanya Bisa Diakses Akun Ber-Role Admin)
+| 5. Halaman Khusus Admin
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'checkRole:admin'])->group(function () {
-    // Halaman melihat seluruh daftar user & statusnya
-    Route::get('/admin/users', [AdminUserController::class, 'index'])->name('admin.users.index');
-    
-    // Tombol aksi untuk mengubah status peran user secara instan
-    Route::patch('/admin/users/{id}/make-tenant', [AdminUserController::class, 'makeTenant'])->name('admin.users.make-tenant');
-    Route::patch('/admin/users/{id}/make-guest', [AdminUserController::class, 'makeGuest'])->name('admin.users.make-guest');
+Route::middleware(['auth', CheckRole::class . ':admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::put('/users/{id}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::post('/users/{id}/toggle', [AdminUserController::class, 'toggleStatus'])->name('users.toggle');
+    Route::delete('/users/{id}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
 
-
-/*
-|--------------------------------------------------------------------------
-| 5. File Otentikasi Bawaan Laravel Breeze (Login, Register, dll)
-|--------------------------------------------------------------------------
-*/
 require __DIR__.'/auth.php';

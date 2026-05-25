@@ -3,35 +3,96 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\DeviceModel;
+use App\Models\User; // Pastikan ini ada dan folder/file benar
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
-    // 1. Menampilkan semua daftar user di halaman admin
     public function index()
     {
-        $users = User::all();
-        return view('admin.users.index', compact('users'));
+        // Pastikan relasi 'devices' sudah didefinisikan di Model User
+        $users = User::with(['devices'])
+            ->where('id', '!=', auth()->id())
+            ->get();
+
+        $totalLogins = User::sum('login_count');
+        $usersLoggedInToday = User::whereDate('last_login_at', today())->count();
+
+        return view('admin.users.index', compact('users', 'totalLogins', 'usersLoggedInToday'));
     }
 
-    // 2. Mengubah role user menjadi 'tenant' (Penyewa)
-    public function makeTenant($id)
+    public function store(Request $request)
     {
-        $user = User::findOrFail($id);
-        $user->role = 'tenant';
-        $user->save();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:tenant,guest',
+            'device_name' => 'nullable|string|max:255',
+        ]);
 
-        return redirect()->back()->with('success', 'User ' . $user->name . ' berhasil diaktifkan sebagai Penyewa!');
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        // Simpan device jika device_name diisi
+        if ($request->filled('device_name')) {
+            DeviceModel::create([
+                'user_id' => $user->id,
+                'device_name' => $request->device_name,
+                'api_key' => Str::random(32),
+            ]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
     }
 
-    // 3. Mengembalikan role user menjadi 'guest' (Orang Luar) jika masa sewa habis
-    public function makeGuest($id)
+    public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $user->role = 'guest';
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+        ]);
+
+        if ($request->filled('password')) {
+            $user->update(['password' => Hash::make($request->password)]);
+        }
+
+        // Logic update device
+        if ($request->filled('device_name')) {
+            Device::updateOrCreate(
+                ['user_id' => $user->id],
+                ['device_name' => $request->device_name]
+            );
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User & Device berhasil diupdate!');
+    }
+
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->role = ($user->role === 'tenant') ? 'guest' : 'tenant';
         $user->save();
 
-        return redirect()->back()->with('success', 'Status penyewa ' . $user->name . ' telah dinonaktifkan.');
+        $pesan = ($user->role === 'tenant') ? "{$user->name} kini jadi Penyewa." : "Akses {$user->name} dicabut.";
+
+        return redirect()->route('admin.users.index')->with('success', $pesan);
+    }
+
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun telah dihapus.');
     }
 }
