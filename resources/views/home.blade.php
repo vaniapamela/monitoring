@@ -47,13 +47,6 @@
     <!-- HERO SECTION -->
     <section class="hero-container">
         <div class="relative z-10 text-center px-6 max-w-5xl hero-content" data-aos="fade-up" data-aos-duration="1000">
-            <!-- LIVE STATUS BADGE (Set to Offline) -->
-            <div class="mb-8 flex items-center justify-center gap-3 bg-white/10 backdrop-blur-md px-5 py-2 rounded-full w-fit mx-auto border border-white/20">
-                <div class="w-2 h-2 bg-rose-500 rounded-full status-offline"></div>
-                <span class="text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                    Sistem: <span class="text-rose-400">Offline (Menunggu Integrasi)</span>
-                </span>
-            </div>
 
             <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-[1.1] mb-6 uppercase tracking-tighter">
                 Gudang Pintar, <br> 

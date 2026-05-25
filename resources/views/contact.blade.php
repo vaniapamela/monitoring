@@ -72,85 +72,40 @@
                      data-aos="fade-right" data-aos-delay="300">
                     <div class="bg-rose-100 w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform">✉️</div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email Support</h3>
-                    <p class="text-base font-bold text-slate-800">support @agrocorporate</p>
+                    <p class="text-base font-bold text-slate-800">agrocorporateo@gmail.com</p>
                 </div>
             </div>
 
-            <div class="lg:col-span-2 glass-card rounded-[3rem] shadow-2xl p-8 md:p-14" 
+            <div class="lg:col-span-2 glass-card rounded-[3rem] shadow-2xl p-8 md:p-14 flex flex-col justify-between" 
                  data-aos="fade-up" data-aos-delay="400">
-                <div class="mb-10">
+                <div class="mb-8">
                     <h2 class="text-3xl font-black text-slate-900 uppercase tracking-tight mb-4">
-                        Kirim <span class="text-emerald-500">Pesan</span>
+                        Hubungi via <span class="text-emerald-500">Gmail</span>
                     </h2>
-                    <p class="text-slate-500 text-sm font-medium italic border-l-4 border-emerald-500 pl-4">
-                        Respon cepat dijamin dalam waktu kurang dari 24 jam.
+                    <p class="text-slate-500 text-sm font-medium italic border-l-4 border-emerald-500 pl-4 mb-6">
+                        Sistem kami sekarang terhubung langsung demi kenyamanan dan keamanan data Anda.
                     </p>
+                    <p class="text-slate-600 text-base leading-relaxed mb-4">
+                        Untuk mempermudah konsultasi mengenai IoT, masalah hardware ESP8266/DHT11, maupun integrasi Cold Storage, Anda akan dialihkan langsung ke aplikasi resmi Gmail Anda.
+                    </p>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 text-emerald-800 text-sm font-medium space-y-2">
+                        <p class="font-bold">💡 Keuntungan Kirim Lewat Gmail Langsung:</p>
+                        <ul class="list-disc list-inside space-y-1 text-emerald-700/90 pl-1">
+                            <li>Bisa menyertakan lampiran foto/file log error hardware.</li>
+                            <li>Riwayat obrolan tersimpan aman di folder terkirim Anda.</li>
+                            <li>Terhindar dari kegagalan kirim akibat gangguan server web.</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <!-- ALERTS UNTUK MENAMPILKAN STATUS DARI SERVER GMAIL -->
-                @if(session('success'))
-                    <div class="bg-emerald-500 text-white p-4 rounded-2xl mb-6 font-bold text-sm shadow-lg shadow-emerald-500/20" data-aos="fade-down">
-                        🎉 {{ session('success') }}
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="bg-rose-500 text-white p-4 rounded-2xl mb-6 font-bold text-sm shadow-lg shadow-rose-500/20" data-aos="fade-down">
-                        ❌ {{ session('error') }}
-                    </div>
-                @endif
-
-                <!-- FORM UTAMA YANG TERHUBUNG KE ROUTE LARAVEL -->
-                <form action="{{ route('contact.send') }}" method="POST" class="space-y-8">
-                    @csrf
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div class="group">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Nama Lengkap</label>
-                            <input type="text" name="name" placeholder="Vania Utama" required
-                                value="{{ old('name') }}"
-                                class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                            @error('name')
-                                <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-                        
-                        <div class="group">
-                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Alamat Email</label>
-                            <input type="email" name="email" placeholder="vania@email.com" required
-                                value="{{ old('email') }}"
-                                class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all">
-                            @error('email')
-                                <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="group">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Subjek Kebutuhan</label>
-                        <select name="subject" class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all appearance-none cursor-pointer">
-                            <option value="Masalah Hardware (ESP8266/DHT11)" {{ old('subject') == 'Masalah Hardware (ESP8266/DHT11)' ? 'selected' : '' }}>🔧 Masalah Hardware (ESP8266/DHT11)</option>
-                            <option value="Integrasi Dashboard Web" {{ old('subject') == 'Integrasi Dashboard Web' ? 'selected' : '' }}>💻 Integrasi Dashboard Web</option>
-                            <option value="Konsultasi Cold Storage" {{ old('subject') == 'Konsultasi Cold Storage' ? 'selected' : '' }}>🌱 Konsultasi Cold Storage</option>
-                            <option value="Tanya Lainnya" {{ old('subject') == 'Tanya Lainnya' ? 'selected' : '' }}>❓ Tanya Lainnya</option>
-                        </select>
-                    </div>
-
-                    <div class="group">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-2 block group-focus-within:text-emerald-500 transition-colors">Detail Pesan</label>
-                        <textarea name="message" rows="5" placeholder="Jelaskan kendala atau pertanyaan Anda secara mendetail..." required
-                            class="w-full px-6 py-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-sm font-bold focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all resize-none">{{ old('message') }}</textarea>
-                        @error('message')
-                            <span class="text-rose-500 text-xs font-bold mt-1 block ml-1">{{ $message }}</span>
-                        @enderror
-                    </div>
-
-                    <button type="submit" 
-                        class="w-full bg-emerald-600 text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transform hover:-translate-y-2 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 cursor-pointer border-none">
-                        Kirim Pesan Sekarang
-                    </button>
-                </form>
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=agrocorporateo@gmail.com&su=Tanya%20Seputar%20IoT%20AgroMonitor&body=Halo%20Tim%20AgroCorporate,%0A%0ASaya%20ingin%20berkonsultasi%20mengenai%20gudang%20pintar%20saya...%0A%0ANama%20%3A%20%0AKendala%20%3A%20" 
+                   target="_blank" 
+                   rel="noopener noreferrer"
+                   class="w-full text-center bg-emerald-600 text-white py-5 rounded-[1.5rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-emerald-500 transform hover:-translate-y-2 transition-all shadow-xl shadow-emerald-900/20 active:scale-95 block text-decoration-none">
+                    Buka Gmail & Tulis Pesan
+                </a>
             </div>
+            
         </div>
     </div>
 </div>

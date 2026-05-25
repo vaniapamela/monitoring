@@ -21,11 +21,14 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
     </style>
+
+    {{-- Wadah untuk menyuntikkan aset CSS/Script spesifik dari halaman anak seperti monitoring --}}
+    @stack('styles')
 </head>
 
 <body class="bg-[#f8fafc] text-slate-700" x-data="{ mobileMenu: false }">
 
-    <!-- Navbar Utama (Desktop) -->
+    <!-- NAVBAR UTAMA -->
     <nav class="bg-white/80 backdrop-blur-lg border-b border-slate-100 fixed w-full top-0 z-50">
 
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
@@ -39,7 +42,7 @@
                 </h1>
             </div>
 
-            <!-- Menu Navigasi Desktop -->
+            <!-- Navigasi Desktop -->
             <div class="hidden md:flex items-center gap-8">
                 <a href="{{ url('/') }}"
                     class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-emerald-600 transition-colors no-underline">Beranda</a>
@@ -63,7 +66,7 @@
                     class="text-xs font-black uppercase tracking-widest text-slate-500 hover:text-emerald-600 transition-colors no-underline">Kontak</a>
             </div>
 
-            <!-- Autentikasi Desktop / Tombol Menu Mobile -->
+            <!-- Menu Pengguna / Autentikasi -->
             <div class="flex items-center gap-4">
 
                 <div class="hidden md:block">
@@ -121,7 +124,6 @@
             </div>
 
         </div>
-
     </nav>
 
     <!-- Overlay Menu Mobile -->
@@ -130,7 +132,6 @@
         x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" @click="mobileMenu = false"
         class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 md:hidden" style="display: none;"></div>
 
-    <!-- Sidebar Menu Mobile -->
     <div class="fixed top-0 right-0 bottom-0 w-72 bg-white z-50 shadow-2xl p-6 flex flex-col justify-between md:hidden transform transition duration-300 ease-in-out"
         x-show="mobileMenu" x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
@@ -203,12 +204,12 @@
         </div>
     </div>
 
-    <!-- Konten Halaman Utama -->
+    <!-- MAIN Halaman Klien -->
     <main class="pt-24 min-h-screen">
         @yield('content')
     </main>
 
-    <!-- Bagian Footer -->
+    <!-- FOOTER -->
     <footer class="bg-white border-t border-slate-100 py-16">
         <div class="container mx-auto px-6 grid md:grid-cols-4 gap-12">
 
@@ -226,11 +227,8 @@
                 </p>
             </div>
 
-            <!-- Kolom 2: Navigasi Menu -->
             <div>
-                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">
-                    Navigasi
-                </h4>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Navigasi</h4>
                 <ul class="space-y-4 text-sm font-bold text-slate-600 list-none p-0">
                     <li><a href="/" class="hover:text-emerald-500 transition no-underline">Beranda</a></li>
                     <li><a href="/about" class="hover:text-emerald-500 transition no-underline">Tentang</a></li>
@@ -246,11 +244,8 @@
                 </ul>
             </div>
 
-            <!-- Kolom 3: Kontak Media Sosial & Email -->
             <div>
-                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">
-                    Hubungi Kami
-                </h4>
+                <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6">Hubungi Kami</h4>
                 <ul class="space-y-4 text-sm font-bold text-slate-600 list-none p-0">
                     <li class="flex flex-col gap-0.5">
                         <span
@@ -286,17 +281,13 @@
                 </ul>
             </div>
 
-            <!-- Kolom 4: Card Status Sistem, Lokasi, dan Copyright Disatukan -->
             <div class="bg-slate-50 p-6 rounded-[2rem] flex flex-col justify-between min-h-[230px]">
                 <div>
-                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">
-                        System Status
+                    <h4 class="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-2">System Status
                     </h4>
                     <div class="flex items-center gap-2">
                         <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span class="text-xs font-black text-slate-900 uppercase">
-                            All Systems Operational
-                        </span>
+                        <span class="text-xs font-black text-slate-900 uppercase">All Systems Operational</span>
                     </div>
                 </div>
 

@@ -199,9 +199,9 @@
                 ['name' => 'Selvi Anggraeni', 'nisn' => '0081581935', 'email' => 'selvianggraeni700@gmail.com', 'role' => 'System Analyst', 'bg_badge' => 'bg-teal-100 text-teal-700', 'photo' => 'images/team/selvi.jpg'],
                 ['name' => 'Rheza Alentta', 'nisn' => '0086713080', 'email' => 'rhezaalenta6@gmail.com', 'role' => 'IoT Hardware Engineer', 'bg_badge' => 'bg-purple-100 text-purple-700', 'photo' => 'images/team/rheza.jpg'],
                 ['name' => 'Novia Anggi Natasya', 'nisn' => '0079878410', 'email' => 'novianggi07@icloud.com', 'role' => 'UI/UX Designer', 'bg_badge' => 'bg-rose-100 text-rose-700', 'photo' => 'images/team/novia.jpg'],
-                ['name' => 'Zaky Virman Abi Fikhri', 'nisn' => '0077953415', 'email' => 'zakyvirmanabi32@gmail.com', 'role' => 'Frontend Developer', 'bg_badge' => 'bg-cyan-100 text-cyan-700', 'photo' => 'images/team/zaky.jpg'],
-                ['name' => 'Indah Firdlotul Azizah', 'nisn' => '0079593879', 'email' => 'indahazizah978@gmail.com', 'role' => 'Backend Developer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/indah.jpg'],
-                ['name' => 'Laila Putri Rahmawati', 'nisn' => '0083645844', 'email' => 'lalarahmawati50@gmail.com', 'role' => 'Backend Developer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/laila.jpg'],
+                ['name' => 'Zaky Virman Abi Fikhri', 'nisn' => '0077953415', 'email' => 'zakyvirmanabi32@gmail.com', 'role' => 'UI/UX Designer', 'bg_badge' => 'bg-cyan-100 text-cyan-700', 'photo' => 'images/team/zaky.jpg'],
+                ['name' => 'Indah Firdlotul Azizah', 'nisn' => '0079593879', 'email' => 'indahazizah978@gmail.com', 'role' => 'IoT Hardware Engineer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/indah.jpg'],
+                ['name' => 'Laila Putri Rahmawati', 'nisn' => '0083645844', 'email' => 'lalarahmawati50@gmail.com', 'role' => 'Web Developer', 'bg_badge' => 'bg-indigo-100 text-indigo-700', 'photo' => 'images/team/laila.jpg'],
             ];
         @endphp
 

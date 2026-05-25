@@ -12,7 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('devices', function (Blueprint $table) {
+
             $table->id();
+
+            $table->string('device_name');
+
+            // Token perangkat ESP8266
+            $table->string('token')->unique();
+
+            // Relasi ke user
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }

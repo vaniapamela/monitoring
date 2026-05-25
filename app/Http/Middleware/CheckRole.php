@@ -4,19 +4,43 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    /**
+     * Handle an incoming request.
+     */
+    public function handle(Request $request, Closure $next, string $role): Response
     {
-        // 1. Cek apakah user sudah login, jika belum atau rolenya tidak sesuai daftar yang diizinkan
-        if (!$request->user() || !in_array($request->user()->role, $roles)) {
-
-            // 2. Tendang balik ke halaman depan (landing page) dengan pesan error
-            return redirect('/')->with('error', 'Akses ditolak! Halaman monitoring hanya untuk Penyewa Gudang.');
+        // 1. Cek apakah user sudah login
+        if (!Auth::check()) {
+            return redirect()->route('login');
         }
 
-        return $next($request);
+        // Ambil data role user dari DB dan ubah paksa ke huruf kecil murni
+        $userRole = strtolower(Auth::user()->role);
+        $targetRole = strtolower($role);
+
+        // 2. Cek apakah role user sesuai
+        if ($userRole === $targetRole) {
+            return $next($request); 
+        }
+
+        // 3. JIKA TIDAK SESUAI, Arahkan berdasarkan role yang dimiliki:
+        
+        // Jika dia Admin, paksa ke halaman admin
+        if ($userRole === 'admin') {
+            return redirect()->route('admin.users.index');
+        }
+
+        // Jika dia Tenant/User, paksa ke halaman monitoring
+        if ($userRole === 'tenant' || $userRole === 'user') {
+            return redirect()->route('monitoring');
+        }
+
+        // Jika tidak dikenali, lempar ke beranda
+        return redirect('/')->with('error', 'Akses ditolak.');
     }
 }
