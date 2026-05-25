@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'role', 'last_login_at'])] 
+#[Fillable(['name', 'email', 'password', 'role', 'last_login_at'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -36,7 +36,7 @@ class User extends Authenticatable
      */
     public function devices()
     {
-        return $this->hasMany(Device::class);
+        return $this->hasMany(DeviceModel::class);
     }
 
     /**
@@ -44,12 +44,11 @@ class User extends Authenticatable
      * Asumsi: Jika sensor_data memiliki user_id
      */
     // Ganti fungsi sensorData di User.php menjadi ini:
-public function sensorData()
-{
-    // User punya banyak SensorData melalui Device
-    return $this->hasManyThrough(SensorData::class, Device::class);
-}
-    
+    public function sensorData()
+    {
+        // User punya banyak SensorData melalui Device
+        return $this->hasManyThrough(SensorData::class, Device::class);
+    }
 
     /**
      * Mengambil data sensor terbaru saja untuk ditampilkan di dashboard

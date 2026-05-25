@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\SensorData;
-use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
 {
@@ -26,11 +27,11 @@ class MonitoringController extends Controller
             return view('monitoring', [
                 'latest' => null,
                 'warehouseStatus' => 'BELUM TERDAFTAR',
-                'history' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'history' => new LengthAwarePaginator([], 0, 10),
                 'chartData' => collect(),
                 'filter' => $request->status,
                 // Kirim pesan error untuk ditampilkan di Blade
-                'error_message' => 'Akun Anda belum dikaitkan dengan perangkat IoT. Silakan hubungi Admin untuk aktivasi.'
+                'error_message' => 'Akun Anda belum dikaitkan dengan perangkat IoT. Silakan hubungi Admin untuk aktivasi.',
             ]);
         }
 
@@ -65,14 +66,14 @@ class MonitoringController extends Controller
             'history' => $query->paginate(10),
             'chartData' => $chartData,
             'filter' => $filter,
-            'error_message' => null // Tidak ada error
+            'error_message' => null, // Tidak ada error
         ]);
     }
 
     public function downloadPdf(Request $request)
     {
         $user = Auth::user();
-        
+
         // Proteksi download bagi admin
         if ($user->role === 'admin') {
             return redirect()->route('admin.users.index');
@@ -85,7 +86,7 @@ class MonitoringController extends Controller
         }
 
         $query = SensorData::whereIn('device_id', $deviceIds)->latest();
-        
+
         // ... (Logika filter PDF tetap sama)
         $history = $query->get();
         $date = now()->format('d-m-Y_H-i');
@@ -93,28 +94,28 @@ class MonitoringController extends Controller
         $pdf = Pdf::loadView('emails.monitoring-pdf', [
             'history' => $history,
             'filter' => $request->status,
-            'user' => $user
+            'user' => $user,
         ]);
 
         return $pdf->download("AgroMonitor_Report_{$date}.pdf");
     }
 
     public function storeSensorData(Request $request)
-{
-    // Cari perangkat berdasarkan token yang dikirim ESP8266
-    $device = \App\Models\Device::where('token', $request->token)->first();
+    {
+        // Cari perangkat berdasarkan token yang dikirim ESP8266
+        $device = DeviceModel::where('token', $request->token)->first();
 
-    if (!$device) {
-        return response()->json(['message' => 'Token Tidak Dikenali'], 403);
+        if (! $device) {
+            return response()->json(['message' => 'Token Tidak Dikenali'], 403);
+        }
+
+        // Simpan data
+        SensorData::create([
+            'device_id' => $device->id,
+            'temperature' => $request->temperature,
+            'humidity' => $request->humidity,
+        ]);
+
+        return response()->json(['message' => 'Data Diterima'], 200);
     }
-
-    // Simpan data
-    \App\Models\SensorData::create([
-        'device_id' => $device->id,
-        'temperature' => $request->temperature,
-        'humidity' => $request->humidity,
-    ]);
-
-    return response()->json(['message' => 'Data Diterima'], 200);
-}
 }

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Device; // Pastikan ini ada dan folder/file benar
+use App\Models\DeviceModel;
+use App\Models\User; // Pastikan ini ada dan folder/file benar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -17,10 +17,10 @@ class UserController extends Controller
         $users = User::with(['devices'])
             ->where('id', '!=', auth()->id())
             ->get();
-        
+
         $totalLogins = User::sum('login_count');
         $usersLoggedInToday = User::whereDate('last_login_at', today())->count();
-        
+
         return view('admin.users.index', compact('users', 'totalLogins', 'usersLoggedInToday'));
     }
 
@@ -31,7 +31,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:tenant,guest',
-            'device_name' => 'nullable|string|max:255', 
+            'device_name' => 'nullable|string|max:255',
         ]);
 
         $user = User::create([
@@ -43,10 +43,10 @@ class UserController extends Controller
 
         // Simpan device jika device_name diisi
         if ($request->filled('device_name')) {
-            Device::create([
-                'user_id'     => $user->id,
+            DeviceModel::create([
+                'user_id' => $user->id,
                 'device_name' => $request->device_name,
-                'api_key'     => Str::random(32),
+                'api_key' => Str::random(32),
             ]);
         }
 
@@ -84,6 +84,7 @@ class UserController extends Controller
         $user->save();
 
         $pesan = ($user->role === 'tenant') ? "{$user->name} kini jadi Penyewa." : "Akses {$user->name} dicabut.";
+
         return redirect()->route('admin.users.index')->with('success', $pesan);
     }
 
@@ -91,6 +92,7 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
         $user->delete();
-        return redirect()->route('admin.users.index')->with('success', "Akun telah dihapus.");
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun telah dihapus.');
     }
 }
