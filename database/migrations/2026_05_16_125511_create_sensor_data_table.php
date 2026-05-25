@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('sensor_data', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->float('temperature', 4, 1); // Contoh: 27.5
+            $table->float('humidity', 4, 1);    // Contoh: 64.0
+            $table->string('fan_status', 5)->default('OFF');
+            $table->string('humidifier_status', 5)->default('OFF');
 
-            $table->float('temperature');
-
-            $table->float('humidity');
-
-            $table->string('fan_status')->default('OFF');
-
+            // Membuat kolom created_at dan updated_at secara otomatis
             $table->timestamps();
         });
     }

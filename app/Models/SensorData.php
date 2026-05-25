@@ -4,31 +4,45 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
 class SensorData extends Model
 {
     use HasFactory;
 
-    // Pastikan nama tabelnya sesuai dengan di phpMyAdmin
+    // Nama tabel didefinisikan secara eksplisit (Best Practice)
     protected $table = 'sensor_data';
 
-    // Tambahkan 'device_id' ke dalam fillable agar bisa disimpan nanti
-    protected $fillable = ['temperature', 'humidity', 'device_id', 'created_at', 'updated_at'];
+    /**
+     * Properti yang diizinkan untuk mass-assignment.
+     * Wajib menyertakan semua kolom yang dikirim dari Controller ke Database.
+     */
+    protected $fillable = [
+        'user_id',            // Menggantikan device_id agar sinkron dengan Controller & Migration
+        'temperature',
+        'humidity',
+        'fan_status',         // Wajib ada agar status Kipas bisa tersimpan
+        'humidifier_status',  // Wajib ada agar status Humidifier bisa tersimpan
+        'created_at',         // Diperlukan karena kita memaksa override waktu GMT+7
+        'updated_at',          // Diperlukan karena kita memaksa override waktu GMT+7
+    ];
 
-    protected static function booted()
-    {
-        // Sebelum data disimpan (creating), paksa set waktu ke Jakarta
-        static::creating(function ($model) {
-            $waktuLokal = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
-            $model->created_at = $waktuLokal;
-            $model->updated_at = $waktuLokal;
-        });
-    }
+    /**
+     * OPTIMASI: Casting tipe data saat dibaca di Blade / API
+     * Ini memastikan waktu dibaca sebagai string tanggal yang rapi, bukan object mentah.
+     */
+    protected $casts = [
+        'temperature' => 'float',
+        'humidity' => 'float',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+    ];
 
-    // Relasi balik: Data sensor ini milik device yang mana?
-    public function device()
+    /**
+     * RELASI (Optional tapi Sangat Berguna):
+     * Menghubungkan kembali data sensor ini ke pemiliknya (User)
+     */
+    public function user()
     {
-        return $this->belongsTo(Device::class, 'device_id');
+        return $this->belongsTo(User::class);
     }
 }
