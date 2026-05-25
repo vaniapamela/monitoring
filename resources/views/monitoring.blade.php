@@ -189,7 +189,7 @@
                                     <p class="font-bold text-slate-700 text-sm font-digital">{{ $item->temperature }}°C /
                                         {{ $item->humidity }}%</p>
                                     <p class="text-[10px] text-slate-400 mt-1 font-digital">
-                                        {{ $item->created_at->format('H:i:s / d M') }}</p>
+                                        {{ $item->created_at->isoFormat('H:i:s / d M') }}</p>
                                 </div>
                                 @if ($item->temperature > 30 || $item->humidity > 85)
                                     <span
@@ -313,7 +313,7 @@
                                     @endif
                                 </td>
                                 <td class="p-6 text-slate-500 text-xs font-semibold font-digital">
-                                    {{ $item->created_at->format('d M Y — H:i:s') }} WIB
+                                    {{ $item->created_at->isoFormat('DD MMMM YYYY — HH:mm:ss') }} WIB
                                 </td>
                             </tr>
                         @empty
@@ -343,7 +343,7 @@
 
         const labels = [
             @foreach ($chartData as $item)
-                "{{ $item->created_at->format('H:i:s') }}",
+                "{{ $item->created_at->isoFormat('H:i:s') }}",
             @endforeach
         ];
         const temperatureData = [
