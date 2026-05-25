@@ -14,68 +14,49 @@ class MonitoringController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Proteksi Admin: Admin tidak boleh masuk ke halaman ini
         if ($user->role === 'admin') {
             return redirect()->route('admin.users.index');
         }
 
-        // 2. Ambil semua ID device milik user
-        $deviceIds = $user->devices()->pluck('id');
+        // Ambil semua data sensor langsung (tanpa device)
+        $latest = SensorData::latest()->first();
 
-        // 3. PENGAMAN: Jika user baru belum memiliki device
-        if ($deviceIds->isEmpty()) {
-            return view('monitoring', [
-                'latest' => null,
-                'warehouseStatus' => 'BELUM TERDAFTAR',
-                'history' => new LengthAwarePaginator([], 0, 10),
-                'chartData' => collect(),
-                'filter' => $request->status,
-                // Kirim pesan error untuk ditampilkan di Blade
-                'error_message' => 'Akun Anda belum dikaitkan dengan perangkat IoT. Silakan hubungi Admin untuk aktivasi.',
-            ]);
-        }
-
-        // 4. Logika normal untuk User yang sudah memiliki device
-        $latest = SensorData::whereIn('device_id', $deviceIds)->latest()->first();
-
-        $chartData = SensorData::whereIn('device_id', $deviceIds)
-            ->latest()
+        $chartData = SensorData::latest()
             ->take(15)
             ->get()
             ->reverse();
 
         $warehouseStatus = 'STANDBY';
+
         if ($latest) {
-            $warehouseStatus = ($latest->temperature > 30 || $latest->humidity > 85) ? 'TIDAK AMAN' : 'AMAN';
+            $warehouseStatus = ($latest->temperature > 30 || $latest->humidity > 85)
+                ? 'TIDAK AMAN'
+                : 'AMAN';
         }
 
-        $query = SensorData::whereIn('device_id', $deviceIds)->latest();
+        $query = SensorData::latest();
         $filter = $request->status;
 
-       if ($filter == 'aman') {
+        if ($filter == 'aman') {
+            $query->whereBetween('temperature', [20, 25])
+                ->whereBetween('humidity', [60, 90]);
 
-    $query->whereBetween('temperature', [20, 25])
-          ->whereBetween('humidity', [60, 90]);
+        } elseif ($filter == 'tidak_aman') {
+            $query->where(function ($q) {
+                $q->where('temperature', '<', 20)
+                ->orWhere('temperature', '>', 25)
+                ->orWhere('humidity', '<', 60)
+                ->orWhere('humidity', '>', 90);
+            });
+        }
 
-} elseif ($filter == 'tidak_aman') {
-
-    $query->where(function ($q) {
-
-        $q->where('temperature', '<', 20)
-          ->orWhere('temperature', '>', 25)
-          ->orWhere('humidity', '<', 60)
-          ->orWhere('humidity', '>', 90);
-
-    });
-
-}
         return view('monitoring', [
             'latest' => $latest,
             'warehouseStatus' => $warehouseStatus,
-            'history' => $query->paginate(10),
+            'history' => $query->paginate(10)->withQueryString(),
             'chartData' => $chartData,
             'filter' => $filter,
-            'error_message' => null, // Tidak ada error
+            'error_message' => null,
         ]);
     }
 

@@ -3,43 +3,47 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\DeviceModel;
 use App\Models\SensorData;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SensorController extends Controller
 {
     public function store(Request $request)
     {
-        // 1. Validasi input data dari ESP8266
+        // Validasi data dari ESP8266
         $request->validate([
-            'api_key' => 'required|string',
+            'token' => 'required|string',
             'temperature' => 'required|numeric',
             'humidity' => 'required|numeric',
         ]);
 
-        // 2. Cek apakah api_key yang dikirim ESP8266 terdaftar di tabel devices
-        $device = DeviceModel::where('api_key', $request->api_key)->first();
+        // Cari user berdasarkan token
+        $user = User::where(
+            'token',
+            $request->token
+        )->first();
 
-        // 3. Jika API Key tidak ditemukan, tolak akses (Kembalikan status 401 Unauthorized)
-        if (! $device) {
+        // Jika token tidak ditemukan
+        if (!$user) {
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized: API Key salah atau tidak terdaftar!',
+                'message' => 'Token tidak valid!',
             ], 401);
         }
 
-        // 4. Jika valid, simpan data ke tabel sensor_data dan ikat dengan device_id-nya
+        // Simpan data sensor
         $sensor = SensorData::create([
-            'device_id' => $device->id,
+            'user_id' => $user->id,
             'temperature' => $request->temperature,
             'humidity' => $request->humidity,
         ]);
 
-        // 5. Beri respon sukses ke ESP8266
+        // Response sukses
         return response()->json([
             'status' => 'success',
-            'message' => 'Data berhasil disimpan untuk device: '.$device->device_name,
+            'message' => 'Data berhasil disimpan',
             'data' => $sensor,
         ], 201);
     }

@@ -29,7 +29,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 auth-bg px-4">
             
             <div class="absolute top-6 left-6">
-                <a href="{{ url('/home') }}" class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors no-underline bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
+                <a href="{{ url('/') }}" class="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-300 hover:text-white transition-colors no-underline bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
                     ← Kembali ke Home
                 </a>
             </div>
