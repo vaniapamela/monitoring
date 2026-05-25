@@ -11,17 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('sensor_data', function (Blueprint $table) {
-    $table->id();
+        Schema::table('devices', function (Blueprint $table) {
 
-    $table->float('temperature');
+            $table->dropColumn('api_key');
 
-    $table->float('humidity');
-
-    $table->string('fan_status')->default('OFF');
-
-    $table->timestamps();
-});
+        });
     }
 
     /**
@@ -29,6 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('sensor_data');
+        Schema::table('devices', function (Blueprint $table) {
+
+            $table->string('api_key')->nullable();
+
+        });
     }
 };

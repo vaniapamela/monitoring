@@ -45,6 +45,7 @@
                         <th class="p-4">Nama</th>
                         <th class="p-4">Email</th>
                         <th class="p-4">Role</th>
+                        <th class="p-4">Token</th>
                         <th class="p-4 text-center">Status Akses</th>
                         <th class="p-4 text-center">Tindakan</th>
                     </tr>
@@ -54,6 +55,8 @@
                         <tr class="hover:bg-slate-50/50 transition-colors">
                             <td class="p-4 text-slate-800 font-bold">{{ $user->name }}</td>
                             <td class="p-4 text-slate-500 font-mono text-xs">{{ $user->email }}</td>
+                            <td class="p-4 text-slate-500 font-mono text-xs">{{ $user->role }}</td>
+                            <td class="p-4 text-slate-500 font-mono text-xs">{{ $user->token ?? '-' }}</td>
                             <td class="p-4">
                                 @if($user->role == 'admin') <span class="bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-[10px] font-black uppercase">👑 Admin</span>
                                 @elseif($user->role == 'tenant') <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md text-[10px] font-black uppercase">🟢 Penyewa</span>
@@ -73,7 +76,7 @@
                             <td class="p-4 text-center">
                                 <div class="flex justify-center gap-2">
                                     <button type="button" 
-                                        onclick="openEditModal({{ json_encode($user) }}, '{{ $user->devices->first()->token ?? '' }}')" 
+                                        onclick="openEditModal({{ json_encode($user) }}, '{{ $user->token ?? '' }}')" 
                                         class="bg-amber-100 text-amber-700 px-3 py-2 rounded-xl text-xs font-bold hover:bg-amber-200">
                                         ✏️ Edit
                                     </button>
@@ -104,6 +107,7 @@
             <input type="text" name="name" placeholder="Nama Lengkap" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
             <input type="email" name="email" placeholder="Email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
             <input type="password" name="password" placeholder="Password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+            <input type="text" name="token" placeholder="Token Perangkat" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
             <select name="role" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
                 <option value="tenant">Penyewa (Tenant)</option>
                 <option value="guest">Orang Luar (Guest)</option>

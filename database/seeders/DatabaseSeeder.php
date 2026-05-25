@@ -20,9 +20,9 @@ class DatabaseSeeder extends Seeder
 
         // 2. Membuat Akun Penyewa Gudang (User 1)
         User::create([
-            'name' => 'Vania Penyewa',
-            'email' => 'vania@gmail.com',
-            'password' => Hash::make('passwordvania'),
+            'name' => 'user penyewa',
+            'email' => 'userpenyewa@gmail.com',
+            'password' => Hash::make('12345678'),
             'role' => 'tenant',
         ]);
     }

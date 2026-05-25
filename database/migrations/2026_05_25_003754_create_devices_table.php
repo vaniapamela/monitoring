@@ -10,19 +10,24 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::create('devices', function (Blueprint $table) {
-        $table->id();
-        $table->string('device_name');
-        $table->string('api_key')->unique(); // Token unik untuk keamanan ESP8266
-        
-        // Menghubungkan device ke tabel users kamu (Foreign Key)
-        // Jika akun user dihapus oleh admin, perangkat miliknya otomatis terhapus
-        $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-        
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('devices', function (Blueprint $table) {
+
+            $table->id();
+
+            $table->string('device_name');
+
+            // Token perangkat ESP8266
+            $table->string('token')->unique();
+
+            // Relasi ke user
+            $table->foreignId('user_id')
+                ->constrained('users')
+                ->onDelete('cascade');
+
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
