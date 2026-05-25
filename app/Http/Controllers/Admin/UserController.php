@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Device; // Jangan lupa import model Device
+use App\Models\Device; // Pastikan ini ada dan folder/file benar
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
     public function index()
     {
-        // 1. Tambahkan 'devices' ke dalam with() agar data token bisa diakses
+        // Pastikan relasi 'devices' sudah didefinisikan di Model User
         $users = User::with(['devices'])
             ->where('id', '!=', auth()->id())
             ->get();
@@ -30,6 +31,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
             'role' => 'required|in:tenant,guest',
+            'device_name' => 'nullable|string|max:255', 
         ]);
 
         $user = User::create([
@@ -39,17 +41,18 @@ class UserController extends Controller
             'role' => $request->role,
         ]);
 
-        // Jika saat tambah user langsung ada token
-        if ($request->filled('token')) {
-            Device::create(['user_id' => $user->id, 'token' => $request->token]);
+        // Simpan device jika device_name diisi
+        if ($request->filled('device_name')) {
+            Device::create([
+                'user_id'     => $user->id,
+                'device_name' => $request->device_name,
+                'api_key'     => Str::random(32),
+            ]);
         }
 
         return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
     }
 
-    /**
-     * 3. Aksi Update: Mengedit User & Token
-     */
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -63,15 +66,15 @@ class UserController extends Controller
             $user->update(['password' => Hash::make($request->password)]);
         }
 
-        // Logic Update/Create Token
-        if ($request->filled('token')) {
+        // Logic update device
+        if ($request->filled('device_name')) {
             Device::updateOrCreate(
                 ['user_id' => $user->id],
-                ['token' => $request->token]
+                ['device_name' => $request->device_name]
             );
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'User & Token berhasil diupdate!');
+        return redirect()->route('admin.users.index')->with('success', 'User & Device berhasil diupdate!');
     }
 
     public function toggleStatus($id)
