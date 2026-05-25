@@ -52,14 +52,23 @@ class MonitoringController extends Controller
         $query = SensorData::whereIn('device_id', $deviceIds)->latest();
         $filter = $request->status;
 
-        if ($filter == 'aman') {
-            $query->where('temperature', '<=', 30)->where('humidity', '<=', 85);
-        } elseif ($filter == 'tidak_aman') {
-            $query->where(function ($q) {
-                $q->where('temperature', '>', 30)->orWhere('humidity', '>', 85);
-            });
-        }
+       if ($filter == 'aman') {
 
+    $query->whereBetween('temperature', [20, 25])
+          ->whereBetween('humidity', [60, 90]);
+
+} elseif ($filter == 'tidak_aman') {
+
+    $query->where(function ($q) {
+
+        $q->where('temperature', '<', 20)
+          ->orWhere('temperature', '>', 25)
+          ->orWhere('humidity', '<', 60)
+          ->orWhere('humidity', '>', 90);
+
+    });
+
+}
         return view('monitoring', [
             'latest' => $latest,
             'warehouseStatus' => $warehouseStatus,

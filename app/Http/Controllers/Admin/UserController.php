@@ -25,34 +25,26 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:tenant,guest',
-            'device_name' => 'nullable|string|max:255',
-        ]);
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|min:3',
+        'role' => 'required',
+        'token' => 'required|max:5|unique:users,token',
+    ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+    User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+        'token' => strtoupper($request->token),
+    ]);
 
-        // Simpan device jika device_name diisi
-        if ($request->filled('device_name')) {
-            DeviceModel::create([
-                'user_id' => $user->id,
-                'device_name' => $request->device_name,
-                'api_key' => Str::random(32),
-            ]);
-        }
-
-        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan!');
-    }
-
+    return back()->with('success', 'User berhasil ditambahkan');
+}
+     
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -60,18 +52,11 @@ class UserController extends Controller
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
+            'token' => $request->token 
         ]);
 
         if ($request->filled('password')) {
             $user->update(['password' => Hash::make($request->password)]);
-        }
-
-        // Logic update device
-        if ($request->filled('device_name')) {
-            Device::updateOrCreate(
-                ['user_id' => $user->id],
-                ['device_name' => $request->device_name]
-            );
         }
 
         return redirect()->route('admin.users.index')->with('success', 'User & Device berhasil diupdate!');

@@ -9,15 +9,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Menambahkan kolom role dengan nilai bawaan 'guest' (User 2)
-            $table->string('role')->default('guest')->after('email');
+
+            $table->string('token')->nullable()->unique();
+
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+
+            $table->dropColumn('token');
+
         });
     }
 };
