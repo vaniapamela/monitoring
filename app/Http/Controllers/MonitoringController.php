@@ -98,12 +98,16 @@ class MonitoringController extends Controller
             return response()->json(['message' => 'Token Tidak Dikenali'], 403);
         }
 
-        // Simpan data
-        SensorData::create([
-            'device_id' => $device->id,
-            'temperature' => $request->temperature,
-            'humidity' => $request->humidity,
-            'fan_status' => $request->fan_status,
+        // 2. Ambil waktu Jakarta detik ini juga
+        $waktuLokal = Carbon::now('Asia/Jakarta')->format('Y-m-d H:i:s');
+
+        // 3. Masukkan ke database dengan memaksa created_at & updated_at pake waktu lokal
+        $sensor = SensorData::create([
+            'temperature' => $validated['temperature'],
+            'humidity' => $validated['humidity'],
+            'fan_status' => $validated['fan_status'],
+            'created_at' => $waktuLokal, // Paksa timpa created_at
+            'updated_at' => $waktuLokal, // Paksa timpa updated_at
         ]);
 
         return response()->json(['message' => 'Data Diterima'], 200);
