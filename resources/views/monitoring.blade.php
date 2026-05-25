@@ -267,75 +267,90 @@
                         <tr class="bg-slate-50/70 border-b border-slate-100">
                             <th
                                 class="p-6 text-center text-[10px] uppercase tracking-widest text-slate-400 font-black w-20">
-                                No</th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Suhu Udara</th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Kelembapan</th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Status Kipas</th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Status Humidifier
+                                No
                             </th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold text-center">Status
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black">Suhu Udara</th>
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black">Kelembapan</th>
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black">Status Kipas</th>
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black">Status Humidifier
+                            </th>
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black text-center">Status
                                 Keamanan</th>
-                            <th class="p-6 text-xs uppercase tracking-wider text-slate-500 font-bold">Waktu Sinkronisasi
+                            <th class="p-6 text-xs uppercase tracking-wider text-slate-400 font-black">Waktu Sinkronisasi
                             </th>
                         </tr>
                     </thead>
-                    {{-- Rubah --}}
 
-                    <tbody class="divide-y divide-slate-50">
+                    <tbody class="divide-y divide-slate-100 bg-white">
                         @forelse($history as $item)
                             @php
                                 $isAman = $item->temperature <= 25 && $item->humidity <= 90;
                             @endphp
-                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <tr class="hover:bg-slate-50/40 transition-colors group">
+                                {{-- Penomoran Pintar Mengikuti Halaman Paginasi --}}
                                 <td class="p-6 text-center font-digital font-bold text-slate-400 text-xs">
-                                    {{ $loop->iteration }}</td>
+                                    {{ $loop->index + $history->firstItem() }}
+                                </td>
+
+                                {{-- Suhu Udara --}}
                                 <td class="p-6">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-baseline gap-1">
                                         <span
-                                            class="text-sm font-black text-slate-800 font-digital">{{ $item->temperature }}</span>
-                                        <span class="text-[10px] font-bold text-rose-500 uppercase">°C</span>
+                                            class="text-sm font-black text-slate-700 font-digital">{{ $item->temperature }}</span>
+                                        <span class="text-[10px] font-bold text-rose-400 uppercase">°C</span>
                                     </div>
                                 </td>
+
+                                {{-- Kelembapan --}}
                                 <td class="p-6">
-                                    <div class="flex items-center gap-1.5">
+                                    <div class="flex items-baseline gap-1">
                                         <span
-                                            class="text-sm font-black text-slate-800 font-digital">{{ $item->humidity }}</span>
-                                        <span class="text-[10px] font-bold text-blue-500 uppercase">% RH</span>
+                                            class="text-sm font-black text-slate-700 font-digital">{{ $item->humidity }}</span>
+                                        <span class="text-[10px] font-bold text-blue-400 uppercase">% RH</span>
                                     </div>
                                 </td>
+
+                                {{-- Status Kipas (Pill Shape Clean style) --}}
                                 <td class="p-6">
                                     <span
-                                        class="px-3 py-1.5 rounded-xl text-[11px] font-bold font-digital {{ ($item->fan_status ?? 'OFF') == 'ON' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-100 text-slate-500' }}">
-                                        ⚙️ {{ $item->fan_status ?? 'OFF' }}
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black font-digital bg-blue-50 text-blue-500 border border-blue-100/50">
+                                        ⚙️ {{ strtoupper($item->fan_status ?? 'OFF') }}
                                     </span>
                                 </td>
+
+                                {{-- Status Humidifier (Pill Shape Clean style) --}}
                                 <td class="p-6">
                                     <span
-                                        class="px-3 py-1.5 rounded-xl text-[11px] font-bold font-digital {{ ($item->fan_status ?? 'OFF') == 'ON' ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-slate-100 text-slate-500' }}">
-                                        ⚙️ {{ $item->humidifier_status ?? 'OFF' }}
+                                        class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-black font-digital bg-blue-50 text-blue-500 border border-blue-100/50">
+                                        ⚙️ {{ strtoupper($item->humidifier_status ?? 'OFF') }}
                                     </span>
                                 </td>
+
+                                {{-- Status Keamanan (Menyesuaikan Warna Merah Muda Solid UI Gambar) --}}
                                 <td class="p-6 text-center">
                                     @if ($isAman)
                                         <span
-                                            class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 px-4 py-1.5 rounded-full text-[10px] font-black tracking-wider uppercase">
+                                            class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100/60 px-4 py-1 rounded-full text-[10px] font-black tracking-wider uppercase">
                                             <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
                                             AMAN
                                         </span>
                                     @else
                                         <span
-                                            class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-100 px-4 py-1.5 rounded-full text-[10px] font-black tracking-wider uppercase">
-                                            <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span> TIDAK AMAN
+                                            class="inline-flex items-center gap-1.5 bg-rose-50 text-rose-500 border border-rose-100/70 px-4 py-1 rounded-full text-[10px] font-black tracking-wider uppercase">
+                                            <span class="w-1.5 h-1.5 bg-rose-500 rounded-full"></span>
+                                            TIDAK AMAN
                                         </span>
                                     @endif
                                 </td>
-                                <td class="p-6 text-slate-500 text-xs font-semibold font-digital">
-                                    {{ $item->created_at->isoFormat('DD MMMM YYYY — HH:mm:ss') }} WIB
+
+                                {{-- Waktu Sinkronisasi --}}
+                                <td class="p-6 text-slate-400 text-xs font-semibold font-digital">
+                                    {{ $item->created_at->isoFormat('DD MMM YYYY — HH:mm:ss') }} WIB
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="p-20 text-center">
+                                <td colspan="7" class="p-20 text-center">
                                     <div class="text-4xl mb-4">📭</div>
                                     <p class="text-slate-400 text-sm font-bold uppercase tracking-wide">Data Log Kosong</p>
                                     <p class="text-slate-300 text-xs mt-1">Belum ada aktivitas sensor terdeteksi untuk
@@ -344,10 +359,54 @@
                             </tr>
                         @endforelse
                     </tbody>
-                    {{-- End Of Rubah --}}
-
                 </table>
             </div>
+
+            {{-- 🛠️ BLOK PAGINASI MODERN (SINKRON DENGAN DEKORASI UI KOTAK SKRENSYUT) --}}
+            @if ($history->hasPages())
+                <div
+                    class="mt-6 px-6 py-4 flex items-center justify-between border-t border-slate-100 bg-slate-50/50 rounded-b-2xl">
+                    <div class="text-xs text-slate-400 font-medium tracking-wide">
+                        Showing
+                        <span class="font-bold text-slate-600 mx-1">{{ $history->firstItem() }}</span>
+                        to
+                        <span class="font-bold text-slate-600 mx-1">{{ $history->lastItem() }}</span>
+                        of
+                        <span class="font-bold text-slate-600 mx-1">{{ $history->total() }}</span>
+                        entries
+                    </div>
+                    <div class="flex items-center gap-1">
+                        {{-- Tombol Sebelumnya --}}
+                        @if ($history->onFirstPage())
+                            <span
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-300 cursor-not-allowed">Previous</span>
+                        @else
+                            <a href="{{ $history->previousPageUrl() }}"
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Previous</a>
+                        @endif
+
+                        {{-- Links Angka Paginasi Pintar --}}
+                        @foreach ($history->getUrlRange(max(1, $history->currentPage() - 2), min($history->lastPage(), $history->currentPage() + 2)) as $page => $url)
+                            @if ($page == $history->currentPage())
+                                <span
+                                    class="px-3 py-1.5 rounded-lg text-xs font-black bg-emerald-500 text-white shadow-sm shadow-emerald-200">{{ $page }}</span>
+                            @else
+                                <a href="{{ $url }}"
+                                    class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        {{-- Tombol Selanjutnya --}}
+                        @if ($history->hasMorePages())
+                            <a href="{{ $history->nextPageUrl() }}"
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">Next</a>
+                        @else
+                            <span
+                                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-300 cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
