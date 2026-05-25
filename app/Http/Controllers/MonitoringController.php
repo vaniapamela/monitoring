@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\SensorData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller
@@ -44,9 +43,9 @@ class MonitoringController extends Controller
         } elseif ($filter == 'tidak_aman') {
             $query->where(function ($q) {
                 $q->where('temperature', '<', 20)
-                ->orWhere('temperature', '>', 25)
-                ->orWhere('humidity', '<', 60)
-                ->orWhere('humidity', '>', 90);
+                    ->orWhere('temperature', '>', 25)
+                    ->orWhere('humidity', '<', 60)
+                    ->orWhere('humidity', '>', 90);
             });
         }
 

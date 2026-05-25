@@ -12,16 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sensor_data', function (Blueprint $table) {
-    $table->id();
+            $table->id();
 
-    $table->float('temperature');
+            $table->float('temperature');
 
-    $table->float('humidity');
+            $table->float('humidity');
 
-    $table->string('fan_status')->default('OFF');
+            $table->string('fan_status')->default('OFF');
 
-    $table->timestamps();
-});
+            $table->timestamps();
+        });
     }
 
     /**
