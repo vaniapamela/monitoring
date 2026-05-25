@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'userpenyewa@gmail.com',
             'password' => Hash::make('12345678'),
             'role' => 'tenant',
+            'token' => 'xyz12345',
         ]);
     }
 }
